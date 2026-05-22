@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: 'Space Mono', 'Rajdhani', ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom Square Range Slider */
+.square-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+  border: 1px solid var(--slider-border);
+  padding: 0 4px;
+}
+.square-slider:focus {
+  outline: none;
+}
+.square-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--slider-track);
+}
+.square-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  width: 14px;
+  background: var(--slider-thumb);
+  margin-top: -5px;
+}
+.square-slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: var(--slider-track);
+}
+.square-slider::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  background: var(--slider-thumb);
+  border: none;
+  border-radius: 0;
+}
