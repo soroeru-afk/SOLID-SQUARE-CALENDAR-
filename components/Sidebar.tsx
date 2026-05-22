@@ -16,10 +16,7 @@ export function Sidebar({
   onRefresh,
   theme,
   showLogTitles,
-  setShowLogTitles,
-  onDriveSync,
-  hasAuth,
-  onLogout
+  setShowLogTitles
 }: any) {
   
   const yyyy = currentDate.getFullYear();

@@ -8,8 +8,14 @@ export function GridSqView({ currentDate, logs, onLogClick, onNewLog, theme, tex
   
   const colors = getThemeColors(theme as Theme);
 
+  const logsByDate = logs.reduce((acc: Record<string, LogFile[]>, log: LogFile) => {
+    if (!acc[log.dateStr]) acc[log.dateStr] = [];
+    acc[log.dateStr].push(log);
+    return acc;
+  }, {});
+
   const getLogsForDay = (dateStr: string) => {
-    return logs.filter((l: LogFile) => l.dateStr === dateStr);
+    return logsByDate[dateStr] || [];
   };
 
   const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];

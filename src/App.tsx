@@ -45,6 +45,7 @@ export default function App() {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [systemFont, setSystemFont] = useState<string>("'Space Mono', 'Rajdhani', ui-monospace, SFMono-Regular, monospace");
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // --- LOCAL STORAGE PERSISTENCE ---
   useEffect(() => {
@@ -77,9 +78,11 @@ export default function App() {
     } catch (e) {
       console.error('Failed to load settings', e);
     }
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!isLoaded) return;
     try {
       localStorage.setItem('solid-square-settings', JSON.stringify({
         theme, textSize, textFont, dateSize, dateFont, systemFont, editorTextSize, showLogTitlesSquare, showLogTitlesList, viewMode
@@ -87,7 +90,7 @@ export default function App() {
     } catch (e) {
       console.error('Failed to save settings', e);
     }
-  }, [theme, textSize, textFont, dateSize, dateFont, systemFont, editorTextSize, showLogTitlesSquare, showLogTitlesList, viewMode]);
+  }, [theme, textSize, textFont, dateSize, dateFont, systemFont, editorTextSize, showLogTitlesSquare, showLogTitlesList, viewMode, isLoaded]);
 
   useEffect(() => {
     try {
