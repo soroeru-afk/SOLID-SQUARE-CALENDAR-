@@ -101,7 +101,7 @@ export function Sidebar({
             <span>SHOW LOG TITLES</span>
             <span className={colors.textMain}>{showLogTitles ? 'ON' : 'OFF'}</span>
           </div>
-          <div className={`flex border ${colors.borderStrong} p-0.5`} style={{ backgroundColor: theme === 'NAVY' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.05)' }}>
+          <div className={`flex border ${colors.borderStrong} p-0.5`} style={{ backgroundColor: theme === 'LIGHT' ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.2)' }}>
             <button onClick={() => setShowLogTitles(true)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : colors.textSub}`}>ON</button>
             <button onClick={() => setShowLogTitles(false)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${!showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : colors.textSub}`}>OFF</button>
           </div>
