@@ -70,3 +70,15 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.5);
 }
+
+/* Custom Overlay Preview */
+.overlay-preview {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.group:hover > .overlay-preview {
+  opacity: var(--preview-opacity, 1);
+  visibility: visible;
+}
+

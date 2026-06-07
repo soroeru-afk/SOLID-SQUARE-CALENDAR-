@@ -191,10 +191,19 @@ export function EditorModal({
         >
           {/* Editor Header (Stealth UI) */}
           <div
-            className={`flex-none flex flex-col px-6 pt-6 pb-4 ${colors.panelBg} shrink-0 border-b border-black/5 dark:border-white/5`}
+            className={`relative flex-none flex flex-col px-6 pt-6 pb-4 ${colors.panelBg} shrink-0 border-b border-black/5 dark:border-white/5`}
           >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              title="閉じる"
+              className={`absolute top-3 right-3 z-50 ${colors.borderStrong} border px-1.5 py-0.5 rounded-sm ${colors.textSubHover} transition-colors flex items-center justify-center cursor-pointer`}
+            >
+              <X size={12} strokeWidth={2.5} />
+            </button>
+
             {/* Title Display */}
-            <div className="mb-4">
+            <div className="mb-4 pr-10 mt-1">
               <div
                 className={`font-bold ${colors.textMain} whitespace-pre-wrap break-all`}
                 style={{
@@ -397,14 +406,6 @@ export function EditorModal({
                 <span className="opacity-50">[CTRL+S]</span> SAVE
               </button>
 
-              {/* Close Button */}
-              <button
-                onClick={onClose}
-                title="閉じる"
-                className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm ${colors.textSubHover} transition-colors flex items-center justify-center`}
-              >
-                <X size={14} strokeWidth={2.5} />
-              </button>
             </div>
           </div>
 

@@ -101,16 +101,19 @@ export default function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isFallbackMode, setIsFallbackMode] = useState(false);
-  const [theme, setTheme] = useState<Theme>("NAVY");
+  const [theme, setTheme] = useState<Theme>("BLACK");
   const [textSize, setTextSize] = useState<number>(12);
+  const [previewWidth, setPreviewWidth] = useState<number>(150);
+  const [previewHeight, setPreviewHeight] = useState<number>(150);
+  const [previewOpacity, setPreviewOpacity] = useState<number>(70);
   const [textFont, setTextFont] = useState<string>(
     "ui-sans-serif, system-ui, sans-serif",
   );
-  const [dateSize, setDateSize] = useState<number>(48);
+  const [dateSize, setDateSize] = useState<number>(84);
   const [dateFont, setDateFont] = useState<string>(
     "ui-sans-serif, system-ui, sans-serif",
   );
-  const [editorTextSize, setEditorTextSize] = useState<number>(16);
+  const [editorTextSize, setEditorTextSize] = useState<number>(20);
   const [editorMaxWidth, setEditorMaxWidth] = useState<number>(760);
   const [editorLineHeight, setEditorLineHeight] = useState<number>(1.75);
   const [showLogTitlesSquare, setShowLogTitlesSquare] =
@@ -141,6 +144,9 @@ export default function App() {
         const parsed = JSON.parse(savedSettings);
         if (parsed.theme) setTheme(parsed.theme);
         if (parsed.textSize) setTextSize(parsed.textSize);
+        if (parsed.previewWidth) setPreviewWidth(parsed.previewWidth);
+        if (parsed.previewHeight) setPreviewHeight(parsed.previewHeight);
+        if (parsed.previewOpacity) setPreviewOpacity(parsed.previewOpacity);
         if (parsed.textFont) setTextFont(parsed.textFont);
         if (parsed.dateSize) setDateSize(parsed.dateSize);
         if (parsed.dateFont) setDateFont(parsed.dateFont);
@@ -192,6 +198,9 @@ export default function App() {
         JSON.stringify({
           theme,
           textSize,
+          previewWidth,
+          previewHeight,
+          previewOpacity,
           textFont,
           dateSize,
           dateFont,
@@ -214,6 +223,9 @@ export default function App() {
   }, [
     theme,
     textSize,
+    previewWidth,
+    previewHeight,
+    previewOpacity,
     textFont,
     dateSize,
     dateFont,
@@ -742,6 +754,57 @@ export default function App() {
                     className="square-slider"
                     style={sliderStyle}
                   />
+
+                  <div
+                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                  >
+                    <span>PREVIEW WIDTH</span>
+                    <span className={colors.textMain}>{previewWidth}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="100"
+                    max="300"
+                    step="10"
+                    value={previewWidth}
+                    onChange={(e) => setPreviewWidth(parseInt(e.target.value))}
+                    className="square-slider"
+                    style={sliderStyle}
+                  />
+
+                  <div
+                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                  >
+                    <span>PREVIEW HEIGHT</span>
+                    <span className={colors.textMain}>{previewHeight}PX</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="150"
+                    max="600"
+                    step="10"
+                    value={previewHeight}
+                    onChange={(e) => setPreviewHeight(parseInt(e.target.value))}
+                    className="square-slider"
+                    style={sliderStyle}
+                  />
+
+                  <div
+                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                  >
+                    <span>PREVIEW OPACITY</span>
+                    <span className={colors.textMain}>{previewOpacity}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="10"
+                    value={previewOpacity}
+                    onChange={(e) => setPreviewOpacity(parseInt(e.target.value))}
+                    className="square-slider"
+                    style={sliderStyle}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -921,6 +984,9 @@ export default function App() {
               onNewLog={handleNewLog}
               theme={theme}
               textSize={textSize}
+              previewWidth={previewWidth}
+              previewHeight={previewHeight}
+              previewOpacity={previewOpacity}
               textFont={textFont}
               dateSize={dateSize}
               dateFont={dateFont}
@@ -936,6 +1002,9 @@ export default function App() {
               onNewLog={handleNewLog}
               theme={theme}
               textSize={textSize}
+              previewWidth={previewWidth}
+              previewHeight={previewHeight}
+              previewOpacity={previewOpacity}
               textFont={textFont}
               dateSize={dateSize}
               dateFont={dateFont}

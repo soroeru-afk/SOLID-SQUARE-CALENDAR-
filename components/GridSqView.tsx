@@ -9,6 +9,9 @@ export function GridSqView({
   onNewLog,
   theme,
   textSize,
+  previewWidth,
+  previewHeight,
+  previewOpacity,
   textFont,
   dateSize,
   dateFont,
@@ -75,11 +78,14 @@ export function GridSqView({
             dateStrObj.getMonth() === currentDate.getMonth();
           const dayLogs = getLogsForDay(dateStr);
           const isToday = dateStr === todayYYYYMMDD;
+          
+          const isRightSide = (idx % 7) >= 4;
+          const isBottom = idx >= 21;
 
           return (
             <div
               key={dateStr + idx}
-              className={`relative border flex flex-col group transition-all duration-300
+              className={`relative border flex flex-col group transition-all duration-300 hover:z-50 hover:opacity-100
                 ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} opacity-50`} 
                 ${isToday ? `ring-2 ring-inset ${colors.ring}` : ""}
               `}
@@ -120,27 +126,31 @@ export function GridSqView({
 
               {/* OVERLAY EXPANDED VIEW (VISIBLE ON HOVER) */}
               <div
-                className={`absolute top-0 left-0 w-full min-h-full ${colors.itemBg} border ${colors.borderStrong} ${colors.shadowLg} z-50 p-1 flex flex-col opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-auto`}
+                className={`absolute ${isBottom ? 'bottom-0' : 'top-0'} ${isRightSide ? 'right-0' : 'left-0'} min-h-full ${colors.itemBg} border ${colors.borderStrong} ${colors.shadowLg} flex flex-col pointer-events-auto overlay-preview z-50 overflow-y-auto no-scrollbar`}
+                style={{
+                  width: `${previewWidth}%`,
+                  maxHeight: `${previewHeight}px`,
+                  "--preview-opacity": previewOpacity / 100,
+                } as React.CSSProperties}
               >
-                <div
-                  className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 ${isToday ? colors.dateNumToday : colors.dateNum}`}
-                  style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}
-                >
-                  {dateStrObj.getDate()}
-                </div>
-
-                {/* ACTION: NEW LOG */}
-                <div className="absolute top-1 left-1 z-10">
+                {/* PREVIEW HEADER */}
+                <div className={`sticky top-0 left-0 w-full flex items-center justify-between z-30 p-1 mb-1 border-b ${colors.borderStrong} ${colors.itemBg}`}>
                   <button
                     onClick={() => onNewLog(dateStrObj)}
-                    className={`w-4 h-4 ${colors.panelBg} border ${colors.borderStrong} ${colors.textSub} flex items-center justify-center text-[10px] ${colors.accentBgHover} ${colors.textSubHover} cursor-pointer ${colors.shadow} transition-colors`}
+                    className={`shrink-0 w-4 h-4 ${colors.panelBg} border ${colors.borderStrong} ${colors.textSub} flex items-center justify-center text-[10px] ${colors.accentBgHover} ${colors.textSubHover} cursor-pointer shadow-sm transition-colors`}
                   >
                     +
                   </button>
+                  <div 
+                    className={`font-bold text-right leading-none ${isToday ? colors.dateNumToday : colors.textMain}`}
+                    style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
+                  >
+                    {dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} {dateStrObj.getDate()}
+                  </div>
                 </div>
 
                 {/* LOG STACK */}
-                <div className="relative z-20 mt-6 flex flex-col gap-[2px]">
+                <div className="relative z-20 flex flex-col gap-[2px] p-1 pt-0">
                   {dayLogs.map((log: LogFile) => (
                     <div
                       key={log.name}
