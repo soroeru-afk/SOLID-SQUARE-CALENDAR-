@@ -1,4 +1,4 @@
-export type Theme = "NAVY" | "LIGHT" | "MONOTONE";
+export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "ROSE";
 export type TextSize = "SM" | "MD" | "LG";
 export type FontType = "SANS" | "MONO" | "SERIF";
 
@@ -26,6 +26,32 @@ export function getThemeColors(theme: Theme) {
       ring: "ring-zinc-700",
       shadow: "shadow-none",
       shadowLg: "shadow-2xl shadow-black",
+    };
+  }
+
+  if (theme === "ROSE") {
+    return {
+      isDark: false,
+      bg: "bg-[#FDF8F8]",
+      panelBg: "bg-[#FFFFFF]",
+      itemBg: "bg-[#FFFFFF]",
+      itemBgHover: "hover:bg-[#F9EFF0]",
+      border: "border-[#DBC9CB]",
+      borderStrong: "border-[#8C6D70]",
+      borderHover: "hover:border-[#915B61]",
+      textMain: "text-[#332225]",
+      textSub: "text-[#765C5F]",
+      textSubHover: "hover:text-[#8C484F]",
+      textDim: "text-[#9E8789]",
+      dateNum: "text-[#E6D6D8]",
+      dateNumToday: "text-[#915B61]",
+      accentBg: "bg-[#F5D8DB]",
+      accentBgHover: "hover:bg-[#E8C2C6]",
+      activeBg: "bg-[#EDDCE0]",
+      activeText: "text-[#4A3B3E]",
+      ring: "ring-[#915B61]/70",
+      shadow: "shadow-sm shadow-[#8C6D70]/10",
+      shadowLg: "shadow-xl shadow-[#8C6D70]/20",
     };
   }
 

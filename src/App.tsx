@@ -593,6 +593,12 @@ export default function App() {
                     >
                       BLACK
                     </button>
+                    <button
+                      onClick={() => setTheme("ROSE")}
+                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "ROSE" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
+                    >
+                      ROSE
+                    </button>
                   </div>
                 </div>
 
