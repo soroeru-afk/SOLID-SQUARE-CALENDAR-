@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { get, set, del } from "idb-keyval";
 import {
   LogFile,
   readLogFiles,
@@ -135,8 +136,9 @@ export default function App() {
   const [speechPitch, setSpeechPitch] = useState<number>(1.0);
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [needsResume, setNeedsResume] = useState<any | null>(null);
 
-  // --- LOCAL STORAGE PERSISTENCE ---
+  // --- LOCAL STORAGE & INDEXEDDB PERSISTENCE ---
   useEffect(() => {
     try {
       const savedSettings = localStorage.getItem("solid-square-settings");
@@ -181,7 +183,27 @@ export default function App() {
     } catch (e) {
       console.error("Failed to load settings", e);
     }
-    setIsLoaded(true);
+
+    const initDirHandle = async () => {
+      try {
+        const handle = await get("solid-square-dir-handle");
+        if (handle) {
+          const permission = await handle.queryPermission({ mode: "readwrite" });
+          if (permission === "granted") {
+            setDirHandle(handle);
+            setIsFallbackMode(false);
+            setLogs(await readLogFiles(handle));
+          } else {
+            setNeedsResume(handle);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load dir handle from idb", err);
+      }
+      setIsLoaded(true);
+    };
+
+    initDirHandle();
   }, []);
 
   useEffect(() => {
@@ -276,10 +298,12 @@ export default function App() {
     setIsFallbackMode(true);
   };
 
-  const clearDirHandle = () => {
+  const clearDirHandle = async () => {
     setDirHandle(null);
     setLogs([]);
     setIsFallbackMode(false);
+    await del("solid-square-dir-handle");
+    setNeedsResume(null);
   };
 
   const handleNewFolder = async () => {
@@ -288,6 +312,8 @@ export default function App() {
       setDirHandle(handle);
       setIsFallbackMode(false);
       setLogs(await readLogFiles(handle));
+      await set("solid-square-dir-handle", handle);
+      setNeedsResume(null);
     } catch (e: any) {
       if (e.name !== "AbortError") {
         console.error(e);
@@ -299,6 +325,22 @@ export default function App() {
           alert("Failed to select or create directory.");
         }
       }
+    }
+  };
+
+  const handleResumeFolder = async () => {
+    try {
+      if (needsResume) {
+        const permission = await needsResume.requestPermission({ mode: "readwrite" });
+        if (permission === "granted") {
+          setDirHandle(needsResume);
+          setIsFallbackMode(false);
+          setLogs(await readLogFiles(needsResume));
+          setNeedsResume(null);
+        }
+      }
+    } catch (e: any) {
+      console.error(e);
     }
   };
 
@@ -967,6 +1009,8 @@ export default function App() {
             onFallbackLoad={handleFallbackLoad}
             onClearDir={clearDirHandle}
             onNewFolder={handleNewFolder}
+            needsResume={needsResume}
+            onResumeFolder={handleResumeFolder}
             onRefresh={handleRefresh}
             theme={theme}
             showLogTitles={showLogTitles}

@@ -119,6 +119,27 @@ export function EditorModal({
     };
   }, []);
 
+  // Handle vertical scroll with mouse wheel
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (isVertical && e.deltaY !== 0) {
+        e.preventDefault();
+        // Since vertical-rl flow relies on horizontal scrolling, map deltaY to scrollLeft.
+        // Scroll amount is adjusted for typical mouse wheel feel (reversed per user request)
+        textarea.scrollLeft -= e.deltaY;
+      }
+    };
+
+    textarea.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      textarea.removeEventListener("wheel", handleWheel);
+    };
+  }, [isVertical]);
+
   // タイトルを動的に生成
   const displayTitle = (() => {
     const contentToSearch = content.trim();

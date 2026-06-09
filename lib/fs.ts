@@ -16,19 +16,37 @@ export async function parseFallbackFiles(files: File[]): Promise<LogFile[]> {
   const logFiles: LogFile[] = [];
   for (const file of files) {
     if (file.name.endsWith('.txt')) {
-      const match = file.name.match(/^(\d{8})_(\d{4})_(.+)\.txt$/);
+      const match = file.name.match(/^(\d{8})_(\d{4})_(.*)\.txt$/);
+      const content = await file.text();
+      let dateStr = "";
+      let timeStr = "";
+      let title = "";
+
       if (match) {
-        const content = await file.text();
-        logFiles.push({
-          handle: null,
-          name: file.name,
-          dateStr: match[1],
-          timeStr: match[2],
-          title: match[3],
-          isFallback: true,
-          content: content // eagerly loaded for caching
-        });
+        dateStr = match[1];
+        timeStr = match[2];
+        title = match[3] || "UNTITLED";
+      } else {
+        const d = new Date(file.lastModified);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const HH = String(d.getHours()).padStart(2, '0');
+        const MM = String(d.getMinutes()).padStart(2, '0');
+        dateStr = `${yyyy}${mm}${dd}`;
+        timeStr = `${HH}${MM}`;
+        title = file.name.replace(/\.txt$/, '');
       }
+
+      logFiles.push({
+        handle: null,
+        name: file.name,
+        dateStr,
+        timeStr,
+        title,
+        isFallback: true,
+        content: content // eagerly loaded for caching
+      });
     }
   }
   return logFiles.sort((a, b) => b.name.localeCompare(a.name));
@@ -50,22 +68,41 @@ export async function readLogFiles(dirHandle: any): Promise<LogFile[]> {
   const files: LogFile[] = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind === 'file' && entry.name.endsWith('.txt')) {
-      const match = entry.name.match(/^(\d{8})_(\d{4})_(.+)\.txt$/);
-      if (match) {
-        try {
-          const fileData = await entry.getFile();
-          const content = await fileData.text();
-          files.push({
-            handle: entry,
-            name: entry.name,
-            dateStr: match[1],
-            timeStr: match[2],
-            title: match[3],
-            content: content
-          });
-        } catch (e) {
-          console.error("Failed to read file part of logs", e);
+      try {
+        const fileData = await entry.getFile();
+        const content = await fileData.text();
+        const match = entry.name.match(/^(\d{8})_(\d{4})_(.*)\.txt$/);
+        
+        let dateStr = "";
+        let timeStr = "";
+        let title = "";
+        
+        if (match) {
+          dateStr = match[1];
+          timeStr = match[2];
+          title = match[3] || "UNTITLED";
+        } else {
+          const d = new Date(fileData.lastModified);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const HH = String(d.getHours()).padStart(2, '0');
+          const MM = String(d.getMinutes()).padStart(2, '0');
+          dateStr = `${yyyy}${mm}${dd}`;
+          timeStr = `${HH}${MM}`;
+          title = entry.name.replace(/\.txt$/, '');
         }
+
+        files.push({
+          handle: entry,
+          name: entry.name,
+          dateStr,
+          timeStr,
+          title,
+          content: content
+        });
+      } catch (e) {
+        console.error("Failed to read file part of logs", e);
       }
     }
   }

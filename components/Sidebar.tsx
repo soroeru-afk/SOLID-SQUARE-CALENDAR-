@@ -13,6 +13,8 @@ export function Sidebar({
   onFallbackLoad,
   onClearDir,
   onNewFolder,
+  needsResume,
+  onResumeFolder,
   onRefresh,
   theme,
   showLogTitles,
@@ -112,8 +114,15 @@ export function Sidebar({
       <div className="p-4 flex-1">
         <div className={`text-[9px] tracking-widest ${colors.textSub} mb-4 pb-1 border-b ${colors.border}`}>03 DATA SETS</div>
         
-        <div className="flex gap-2">
-          <button onClick={onNewFolder} className={`flex-1 border ${colors.border} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>+ NEW FOLDER</button>
+        <div className="flex flex-col gap-2">
+          {needsResume && !dirHandle && (
+            <button onClick={onResumeFolder} className={`flex-1 border ${colors.borderStrong} py-2 font-bold text-[10px] ${colors.textMain} ${colors.accentBgHover} transition-colors bg-slate-800/50`}>
+              RESUME ACCESS
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button onClick={onNewFolder} className={`flex-1 border ${colors.border} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>+ NEW FOLDER</button>
+          </div>
         </div>
 
         <button 
