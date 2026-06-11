@@ -143,11 +143,33 @@ export default function App() {
 
     const updateVoices = () => {
       const allVoices = window.speechSynthesis.getVoices();
-      const jaVoices = allVoices.filter(
-        (v) => (v.lang.includes("ja-JP") || v.lang.includes("ja_JP")) &&
-               !v.name.includes("日本語") &&
-               !v.name.includes("Google")
-      );
+      const jaVoices = allVoices.filter((v) => {
+        const isJa = v.lang.includes("ja-JP") || v.lang.includes("ja_JP");
+        if (!isJa) return false;
+
+        const nameLower = v.name.toLowerCase();
+        // 1. Googleボイスの除外
+        if (nameLower.includes("google")) return false;
+        // 2. 「日本語」という文字列を含むものの除外
+        if (nameLower.includes("日本語") || nameLower.includes("にほんご") || nameLower.includes("ﾆﾎﾝｺﾞ")) return false;
+        // 3. 開発用サーバーボイスなどの除外
+        if (nameLower.includes("server speech") || nameLower.includes("harukarus")) return false;
+
+        // 4. プロバイダ名を除いたシンプルな名前をチェック
+        const nameWithoutProvider = v.name.replace(/Microsoft |Google |Online \(Natural\) |Natural /g, "");
+        const nameClean = nameWithoutProvider.toLowerCase().trim();
+        // 単に "japanese" や "japan" といった汎用名のみのものは除外
+        if (
+          nameClean === "japanese" ||
+          nameClean === "japan" ||
+          nameClean === "japanese (japan)" ||
+          nameClean.startsWith("japanese ")
+        ) {
+          return false;
+        }
+
+        return true;
+      });
       setAvailableVoices(jaVoices);
     };
 
