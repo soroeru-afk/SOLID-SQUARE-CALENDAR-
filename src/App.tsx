@@ -144,7 +144,9 @@ export default function App() {
     const updateVoices = () => {
       const allVoices = window.speechSynthesis.getVoices();
       const jaVoices = allVoices.filter(
-        (v) => v.lang.includes("ja-JP") || v.lang.includes("ja_JP")
+        (v) => (v.lang.includes("ja-JP") || v.lang.includes("ja_JP")) &&
+               !v.name.includes("日本語") &&
+               !v.name.includes("Google")
       );
       setAvailableVoices(jaVoices);
     };
