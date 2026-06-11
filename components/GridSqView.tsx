@@ -87,8 +87,8 @@ export function GridSqView({
           className="grid grid-cols-7 grid-rows-5 gap-[2px] overflow-hidden transition-all duration-300"
           style={{
             aspectRatio: gridAspectRatio || undefined,
-            width: "100%",
-            height: "100%",
+            width: gridAspectRatio ? "auto" : "100%",
+            height: gridAspectRatio ? "auto" : "100%",
             maxWidth: "100%",
             maxHeight: "100%",
             display: "grid",
