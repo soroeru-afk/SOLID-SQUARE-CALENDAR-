@@ -135,6 +135,40 @@ export default function App() {
   const [speechRate, setSpeechRate] = useState<number>(2.0);
   const [speechVolume, setSpeechVolume] = useState<number>(1.0);
   const [speechPitch, setSpeechPitch] = useState<number>(1.0);
+  const [availableVoices, setAvailableVoices] = useState<any[]>([]);
+
+  // Preload and get available Japanese voices
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    const updateVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      const jaVoices = allVoices.filter(
+        (v) => v.lang.includes("ja-JP") || v.lang.includes("ja_JP")
+      );
+      setAvailableVoices(jaVoices);
+    };
+
+    updateVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+  }, []);
+
+  // Auto-adjust default speechVoice to first available Japanese voice if legacy default doesn't exist
+  useEffect(() => {
+    if (availableVoices.length > 0) {
+      const hasSelectedExists = availableVoices.some(v => v.name === speechVoice || v.name.includes(speechVoice));
+      if (!hasSelectedExists) {
+        const ichiro = availableVoices.find(v => v.name.includes("Ichiro"));
+        if (ichiro) {
+          setSpeechVoice(ichiro.name);
+        } else {
+          setSpeechVoice(availableVoices[0].name);
+        }
+      }
+    }
+  }, [availableVoices, speechVoice]);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [needsResume, setNeedsResume] = useState<any | null>(null);
@@ -942,36 +976,25 @@ export default function App() {
                       onChange={(e) => setSpeechVoice(e.target.value)}
                       className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                     >
-                      <option
-                        value="Ichiro"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Ichiro (JP)
-                      </option>
-                      <option
-                        value="Ayumi"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Ayumi (JP)
-                      </option>
-                      <option
-                        value="Haruka"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Haruka (JP)
-                      </option>
-                      <option
-                        value="Keita"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Keita (JP)
-                      </option>
-                      <option
-                        value="Nanami"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Nanami (JP)
-                      </option>
+                      {availableVoices.length > 0 ? (
+                        availableVoices.map((voice) => (
+                          <option
+                            key={voice.name}
+                            value={voice.name}
+                            className="bg-slate-900 text-slate-100 py-1"
+                          >
+                            {voice.name.replace(/Microsoft |Google |Online \(Natural\) |Natural /g, "").toUpperCase()}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="Ichiro" className="bg-slate-900 text-slate-100 py-1">Ichiro (JP)</option>
+                          <option value="Ayumi" className="bg-slate-900 text-slate-100 py-1">Ayumi (JP)</option>
+                          <option value="Haruka" className="bg-slate-900 text-slate-100 py-1">Haruka (JP)</option>
+                          <option value="Keita" className="bg-slate-900 text-slate-100 py-1">Keita (JP)</option>
+                          <option value="Nanami" className="bg-slate-900 text-slate-100 py-1">Nanami (JP)</option>
+                        </>
+                      )}
                     </select>
                     <ChevronDown
                       size={14}

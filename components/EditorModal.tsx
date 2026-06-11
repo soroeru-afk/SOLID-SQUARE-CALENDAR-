@@ -184,6 +184,9 @@ export function EditorModal({
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+    }
   }, []);
 
   const handleSave = useCallback(() => {
