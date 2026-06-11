@@ -121,6 +121,7 @@ export default function App() {
     useState<boolean>(false);
   const [showLogTitlesList, setShowLogTitlesList] = useState<boolean>(true);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [cellAspectRatio, setCellAspectRatio] = useState<"FREE" | "1:1" | "4:3" | "3:2">("FREE");
   const [settingsTab, setSettingsTab] = useState<
     "GENERAL" | "EDITOR" | "AUDIO"
   >("GENERAL");
@@ -164,6 +165,7 @@ export default function App() {
         if (parsed.showLogTitlesList !== undefined)
           setShowLogTitlesList(parsed.showLogTitlesList);
         if (parsed.viewMode) setViewMode(parsed.viewMode);
+        if (parsed.cellAspectRatio) setCellAspectRatio(parsed.cellAspectRatio);
 
         if (parsed.speechVoice) setSpeechVoice(parsed.speechVoice);
         if (parsed.speechRate) setSpeechRate(parsed.speechRate);
@@ -233,6 +235,7 @@ export default function App() {
           showLogTitlesSquare,
           showLogTitlesList,
           viewMode,
+          cellAspectRatio,
           speechVoice,
           speechRate,
           speechVolume,
@@ -258,6 +261,7 @@ export default function App() {
     showLogTitlesSquare,
     showLogTitlesList,
     viewMode,
+    cellAspectRatio,
     speechVoice,
     speechRate,
     speechVolume,
@@ -773,6 +777,30 @@ export default function App() {
                     style={sliderStyle}
                   />
                 </div>
+
+                {/* CELL RATIO */}
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                  >
+                    <span>CELL RATIO</span>
+                    <span className={colors.textMain}>{cellAspectRatio === "FREE" ? "FREE" : cellAspectRatio}</span>
+                  </div>
+                  <div
+                    className="flex bg-black/10 border border-black/20 p-0.5"
+                    style={{ borderColor: "var(--border-color)" }}
+                  >
+                    {(["FREE", "1:1", "4:3", "3:2"] as const).map((ratio) => (
+                      <button
+                        key={ratio}
+                        onClick={() => setCellAspectRatio(ratio)}
+                        className={`flex-1 py-1 text-[10px] font-bold font-mono tracking-wider ${cellAspectRatio === ratio ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
+                      >
+                        {ratio}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1063,6 +1091,7 @@ export default function App() {
               dateSize={dateSize}
               dateFont={dateFont}
               showLogTitles={showLogTitles}
+              cellAspectRatio={cellAspectRatio}
             />
           )}
 

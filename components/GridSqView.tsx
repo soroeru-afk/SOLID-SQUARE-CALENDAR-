@@ -16,6 +16,7 @@ export function GridSqView({
   dateSize,
   dateFont,
   showLogTitles,
+  cellAspectRatio = "FREE",
 }: any) {
   const days = getCalendarDays(
     currentDate.getFullYear(),
@@ -24,6 +25,16 @@ export function GridSqView({
   const todayYYYYMMDD = toYYYYMMDD(new Date());
 
   const colors = getThemeColors(theme as Theme);
+
+  // Calculate overall grid aspect ratio based on cell aspect ratio (7 columns, 5 rows)
+  let gridAspectRatio: string | null = null;
+  if (cellAspectRatio === "1:1") {
+    gridAspectRatio = "7 / 5";
+  } else if (cellAspectRatio === "4:3") {
+    gridAspectRatio = "28 / 15"; // (7*4) / (5*3)
+  } else if (cellAspectRatio === "3:2") {
+    gridAspectRatio = "21 / 10"; // (7*3) / (5*2)
+  }
 
   const logsByDate = logs.reduce(
     (acc: Record<string, LogFile[]>, log: LogFile) => {
@@ -70,8 +81,19 @@ export function GridSqView({
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="flex-1 grid grid-cols-7 grid-rows-5 gap-[2px] overflow-hidden">
+      {/* Grid Wrapper */}
+      <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+        <div
+          className="grid grid-cols-7 grid-rows-5 gap-[2px] overflow-hidden transition-all duration-300"
+          style={{
+            aspectRatio: gridAspectRatio || undefined,
+            width: "100%",
+            height: "100%",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            display: "grid",
+          } as any}
+        >
         {days.slice(0, 35).map((dateStrObj: Date, idx: number) => {
           const dateStr = toYYYYMMDD(dateStrObj);
           const isCurrentMonth =
@@ -178,6 +200,7 @@ export function GridSqView({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
