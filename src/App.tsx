@@ -102,7 +102,7 @@ export default function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isFallbackMode, setIsFallbackMode] = useState(false);
-  const [theme, setTheme] = useState<Theme>("BLACK");
+  const [theme, setTheme] = useState<Theme>("MONOTONE");
   const [textSize, setTextSize] = useState<number>(12);
   const [previewWidth, setPreviewWidth] = useState<number>(150);
   const [previewHeight, setPreviewHeight] = useState<number>(150);
@@ -307,6 +307,10 @@ export default function App() {
   };
 
   const handleNewFolder = async () => {
+    if (window.self !== window.top) {
+      alert("【プレビュー環境の制限】\nセキュリティ制限により、このプレビュー画面（iFrame）内ではフォルダを選択・開くことができません。\n\nアプリを新しいタブで開くか、ローカル環境でご利用ください。\n※プレビューでの一時的な読み込みには下の「DIRECTORY IMPORT」をご利用いただけます。");
+      return;
+    }
     try {
       const handle = await window.showDirectoryPicker({ mode: "readwrite" });
       setDirHandle(handle);
@@ -319,16 +323,20 @@ export default function App() {
         console.error(e);
         if (e.message && e.message.includes("Cross origin")) {
           alert(
-            "【プレビュー環境の制限】\nセキュリティ制限により、このプレビュー画面内ではフォルダの選択や作成を行うことができません。\n\nお手数ですが、現在ご利用いただいている PWA（アプリ版）を開いてお試しください。",
+            "【プレビュー環境の制限】\nセキュリティ制限により、このプレビュー画面内ではフォルダの選択や開くことができません。\n\nアプリを新しいタブで開くか、ローカル環境でお試しください。",
           );
         } else {
-          alert("Failed to select or create directory.");
+          alert("Failed to open directory.");
         }
       }
     }
   };
 
   const handleResumeFolder = async () => {
+    if (window.self !== window.top) {
+      alert("【プレビュー環境の制限】\nセキュリティ制限により、このプレビュー画面（iFrame）内ではフォルダに再接続することができません。\n\nアプリを新しいタブで開くか、ローカル環境でご利用ください。");
+      return;
+    }
     try {
       if (needsResume) {
         const permission = await needsResume.requestPermission({ mode: "readwrite" });
@@ -355,15 +363,35 @@ export default function App() {
   const handleLogClick = async (log: LogFile) => {
     try {
       let content = log.content || "";
-      // Fallback just in case content wasn't loaded eagerly
-      if (!content && log.handle) {
-        content = await readFileContent(log.handle);
+      if (!content) {
+        if (log.fallbackFile) {
+          content = await readFileContent(null, log.fallbackFile);
+        } else if (log.handle) {
+          content = await readFileContent(log.handle);
+        }
       }
       setSelectedLog({ ...log, content });
       setIsEditorOpen(true);
     } catch (e) {
       console.error(e);
       alert("Failed to read file content.");
+    }
+  };
+
+  const handleNavigate = async (dir: "PREV" | "NEXT") => {
+    if (!selectedLog) return;
+    const currentIndex = logs.findIndex((l) => l.name === selectedLog.name);
+    if (currentIndex === -1) return;
+
+    let newIndex = currentIndex;
+    if (dir === "PREV") {
+      newIndex = currentIndex - 1; // newer file (higher up in the visual list)
+    } else {
+      newIndex = currentIndex + 1; // older file
+    }
+
+    if (newIndex >= 0 && newIndex < logs.length) {
+      await handleLogClick(logs[newIndex]);
     }
   };
 
@@ -1059,26 +1087,34 @@ export default function App() {
       </div>
 
       {/* EDITOR */}
-      {isEditorOpen && selectedLog && (
-        <EditorModal
-          log={selectedLog}
-          onClose={() => setIsEditorOpen(false)}
-          onSave={handleSaveLog}
-          isFallbackMode={isFallbackMode}
-          theme={theme}
-          textSize={editorTextSize}
-          setEditorTextSize={setEditorTextSize}
-          editorMaxWidth={editorMaxWidth}
-          setEditorMaxWidth={setEditorMaxWidth}
-          editorLineHeight={editorLineHeight}
-          setEditorLineHeight={setEditorLineHeight}
-          textFont={textFont}
-          speechVoice={speechVoice}
-          speechRate={speechRate}
-          speechVolume={speechVolume}
-          speechPitch={speechPitch}
-        />
-      )}
+      {isEditorOpen && selectedLog && (() => {
+        const currentIndex = logs.findIndex((l) => l.name === selectedLog.name);
+        const hasPrev = currentIndex > 0;
+        const hasNext = currentIndex >= 0 && currentIndex < logs.length - 1;
+        return (
+          <EditorModal
+            log={selectedLog}
+            onClose={() => setIsEditorOpen(false)}
+            onSave={handleSaveLog}
+            onNavigate={handleNavigate}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            isFallbackMode={isFallbackMode}
+            theme={theme}
+            textSize={editorTextSize}
+            setEditorTextSize={setEditorTextSize}
+            editorMaxWidth={editorMaxWidth}
+            setEditorMaxWidth={setEditorMaxWidth}
+            editorLineHeight={editorLineHeight}
+            setEditorLineHeight={setEditorLineHeight}
+            textFont={textFont}
+            speechVoice={speechVoice}
+            speechRate={speechRate}
+            speechVolume={speechVolume}
+            speechPitch={speechPitch}
+          />
+        );
+      })()}
     </div>
   );
 }

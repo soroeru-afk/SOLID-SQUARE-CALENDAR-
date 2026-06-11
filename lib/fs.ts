@@ -17,7 +17,6 @@ export async function parseFallbackFiles(files: File[]): Promise<LogFile[]> {
   for (const file of files) {
     if (file.name.endsWith('.txt')) {
       const match = file.name.match(/^(\d{8})_(\d{4})_(.*)\.txt$/);
-      const content = await file.text();
       let dateStr = "";
       let timeStr = "";
       let title = "";
@@ -45,7 +44,7 @@ export async function parseFallbackFiles(files: File[]): Promise<LogFile[]> {
         timeStr,
         title,
         isFallback: true,
-        content: content // eagerly loaded for caching
+        fallbackFile: file
       });
     }
   }
@@ -64,24 +63,32 @@ export async function pickDirectory(): Promise<any | null> {
   }
 }
 
-export async function readLogFiles(dirHandle: any): Promise<LogFile[]> {
+export async function readLogFiles(dirHandle: any, path: string = ""): Promise<LogFile[]> {
   const files: LogFile[] = [];
+  
   for await (const entry of dirHandle.values()) {
     if (entry.kind === 'file' && entry.name.endsWith('.txt')) {
-      try {
-        const fileData = await entry.getFile();
-        const content = await fileData.text();
-        const match = entry.name.match(/^(\d{8})_(\d{4})_(.*)\.txt$/);
-        
-        let dateStr = "";
-        let timeStr = "";
-        let title = "";
-        
-        if (match) {
-          dateStr = match[1];
-          timeStr = match[2];
-          title = match[3] || "UNTITLED";
-        } else {
+      const match = entry.name.match(/^(\d{8})_(\d{4})_(.*)\.txt$/);
+      
+      let dateStr = "";
+      let timeStr = "";
+      let title = "";
+      
+      if (match) {
+        dateStr = match[1];
+        timeStr = match[2];
+        title = match[3] || "UNTITLED";
+        files.push({
+          handle: entry,
+          name: entry.name,
+          dateStr,
+          timeStr,
+          title
+        });
+      } else {
+        try {
+          // Fallback parsing requires fetching file metadata to get lastModified.
+          const fileData = await entry.getFile();
           const d = new Date(fileData.lastModified);
           const yyyy = d.getFullYear();
           const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -91,22 +98,32 @@ export async function readLogFiles(dirHandle: any): Promise<LogFile[]> {
           dateStr = `${yyyy}${mm}${dd}`;
           timeStr = `${HH}${MM}`;
           title = entry.name.replace(/\.txt$/, '');
+          files.push({
+            handle: entry,
+            name: entry.name,
+            dateStr,
+            timeStr,
+            title
+          });
+        } catch (e) {
+          console.error("Failed to read file part of logs: " + entry.name, e);
         }
-
-        files.push({
-          handle: entry,
-          name: entry.name,
-          dateStr,
-          timeStr,
-          title,
-          content: content
-        });
+      }
+    } else if (entry.kind === 'directory') {
+      try {
+        const subFiles = await readLogFiles(entry, path + entry.name + "/");
+        files.push(...subFiles);
       } catch (e) {
-        console.error("Failed to read file part of logs", e);
+        console.error("Failed to read directory: " + entry.name, e);
       }
     }
   }
-  return files.sort((a, b) => b.name.localeCompare(a.name)); // Sort descending
+
+  if (path === "") {
+    return files.sort((a, b) => b.name.localeCompare(a.name)); // Sort descending at the root level
+  } else {
+    return files;
+  }
 }
 
 export async function readFileContent(handle: any, fallbackFile?: File): Promise<string> {

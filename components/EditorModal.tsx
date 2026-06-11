@@ -31,12 +31,30 @@ export function EditorModal({
   speechRate = 2.0,
   speechVolume = 1.0,
   speechPitch = 1.0,
+          onNavigate,
+  hasPrev,
+  hasNext,
 }: any) {
   const [content, setContent] = useState(log.content || "");
+  
+  useEffect(() => {
+    setContent(log.content || "");
+    setIsEditing(log.isNew || false);
+  }, [log]);
+
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">(
     "left",
   );
-  const [isVertical, setIsVertical] = useState(false);
+  const [isVertical, setIsVertical] = useState(() => localStorage.getItem("solid-square-is-vertical") === "true");
+  const [isPaperMode, setIsPaperMode] = useState(() => localStorage.getItem("solid-square-is-paper") === "true");
+  
+  useEffect(() => {
+    localStorage.setItem("solid-square-is-vertical", String(isVertical));
+  }, [isVertical]);
+  
+  useEffect(() => {
+    localStorage.setItem("solid-square-is-paper", String(isPaperMode));
+  }, [isPaperMode]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEditing, setIsEditing] = useState(log.isNew || false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -156,6 +174,10 @@ export function EditorModal({
   })();
 
   const colors = getThemeColors(theme as Theme);
+  const isPaperActive = isPaperMode;
+  const panelBgClass = isPaperActive ? "bg-[#FAF6F0]" : colors.panelBg;
+  const textMainClass = isPaperActive ? "text-[#181818]" : colors.textMain;
+  const textDimClass = isPaperActive ? "text-black/30" : colors.textDim;
 
   // Focus on mount
   useEffect(() => {
@@ -176,7 +198,7 @@ export function EditorModal({
     if (setEditorTextSize) setEditorTextSize(Math.max(textSize - 2, 8));
   };
 
-  // Handle Ctrl+S
+  // Handle Ctrl+S and Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
@@ -186,10 +208,25 @@ export function EditorModal({
       if (e.key === "Escape") {
         onClose();
       }
+      
+      // j and k navigation when not editing text
+      if (!isEditing && e.target instanceof HTMLElement) {
+         const tagName = e.target.tagName.toLowerCase();
+         if (tagName !== "textarea" && tagName !== "input") {
+            if (e.key === "k" && hasPrev && onNavigate) {
+               e.preventDefault();
+               onNavigate('PREV');
+            }
+            if (e.key === "j" && hasNext && onNavigate) {
+               e.preventDefault();
+               onNavigate('NEXT');
+            }
+         }
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [content, log, handleSave, onClose]);
+  }, [content, log, handleSave, onClose, isEditing, hasPrev, hasNext, onNavigate]);
 
   return (
     <AnimatePresence>
@@ -231,6 +268,7 @@ export function EditorModal({
                   fontSize: `${Math.max(18, textSize * 1.2)}px`,
                   fontFamily: textFont,
                   lineHeight: 1.4,
+                  minHeight: "2.8em",
                 }}
               >
                 {displayTitle}
@@ -244,13 +282,14 @@ export function EditorModal({
 
             {/* Toolbar */}
             <div
-              className={`flex items-center gap-6 text-[10px] uppercase tracking-wider ${colors.textSub} font-bold select-none flex-wrap overflow-x-auto no-scrollbar`}
+              className={`flex items-center justify-between gap-x-4 gap-y-3 w-full text-[10px] uppercase tracking-wider ${colors.textSub} font-bold select-none flex-wrap overflow-x-auto no-scrollbar`}
             >
-              {/* Text Size Controls */}
-              {setEditorTextSize && (
-                <div
-                  className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm mr-2`}
-                >
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Text Size Controls */}
+                {setEditorTextSize && (
+                  <div
+                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm`}
+                  >
                   <button
                     onClick={decreaseTextSize}
                     title="文字を小さく"
@@ -275,7 +314,7 @@ export function EditorModal({
               )}
 
               {/* Layout Controls */}
-              <div className="flex items-center gap-2 mr-2">
+              <div className="flex items-center gap-2">
                 {setEditorMaxWidth && (
                   <div
                     className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm`}
@@ -342,9 +381,11 @@ export function EditorModal({
                   </div>
                 )}
               </div>
+              </div>
 
-              {/* Align Group */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-wrap ml-auto">
+                {/* Align Group */}
+                <div className="flex items-center gap-4">
                 <button
                   onClick={() => setTextAlign("left")}
                   title="左寄せ"
@@ -389,6 +430,15 @@ export function EditorModal({
               </div>
 
               <div className={`w-[1px] h-3 ${colors.borderStrong}`}></div>
+              <button
+                onClick={() => setIsPaperMode(!isPaperMode)}
+                title="ペーパーモード"
+                className={`${colors.textSubHover} transition-colors ${isPaperMode ? colors.textMain : ""}`}
+              >
+                PAPER / {isPaperMode ? "ON" : "OFF"}
+              </button>
+
+              <div className={`w-[1px] h-3 ${colors.borderStrong}`}></div>
 
               {/* Play Button */}
               <button
@@ -427,12 +477,37 @@ export function EditorModal({
                 <span className="opacity-50">[CTRL+S]</span> SAVE
               </button>
 
+              <div className={`w-[1px] h-3 ${colors.borderStrong}`}></div>
+
+              {/* Navigation Group */}
+              {onNavigate && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => hasPrev && onNavigate('PREV')}
+                    disabled={!hasPrev}
+                    title="新しく古いファイルへ"
+                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasPrev ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
+                  >
+                    PREV
+                  </button>
+                  <button
+                    onClick={() => hasNext && onNavigate('NEXT')}
+                    disabled={!hasNext}
+                    title="古いファイルへ"
+                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasNext ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
+                  >
+                    NEXT
+                  </button>
+                </div>
+              )}
+              </div>
+
             </div>
           </div>
 
           {/* Editor Body */}
           <div
-            className={`flex-1 w-full flex justify-center py-8 px-6 ${colors.panelBg} overflow-hidden group relative`}
+            className={`flex-1 w-full flex justify-center py-8 px-6 ${panelBgClass} overflow-hidden group relative`}
           >
             {isVertical && (
               <>
@@ -446,7 +521,7 @@ export function EditorModal({
                   style={{ zIndex: 20 }}
                   title="左へスクロール"
                 >
-                  <ChevronLeft size={32} className={colors.textMain} />
+                  <ChevronLeft size={32} className={textMainClass} />
                 </button>
                 <button
                   onMouseDown={() => startScroll(1)}
@@ -458,7 +533,7 @@ export function EditorModal({
                   style={{ zIndex: 20 }}
                   title="右へスクロール"
                 >
-                  <ChevronRight size={32} className={colors.textMain} />
+                  <ChevronRight size={32} className={textMainClass} />
                 </button>
               </>
             )}
@@ -469,7 +544,7 @@ export function EditorModal({
             >
               {content === "" && (
                 <div
-                  className={`absolute top-0 left-0 ${colors.textDim} font-bold pointer-events-none whitespace-pre-wrap select-none w-full`}
+                  className={`absolute top-0 left-0 ${textDimClass} font-bold pointer-events-none whitespace-pre-wrap select-none w-full`}
                   style={{
                     textAlign,
                     fontSize: `${textSize}px`,
@@ -486,7 +561,7 @@ export function EditorModal({
                 readOnly={!isEditing}
                 onChange={(e) => setContent(e.target.value)}
                 onClick={handleTextareaClick}
-                className={`w-full h-full bg-transparent resize-none outline-none ${colors.textMain} no-scrollbar relative z-10 font-sans ${!isEditing ? "selection:bg-black/10 dark:selection:bg-white/10" : ""}`}
+                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} no-scrollbar relative z-10 font-sans ${!isEditing ? "selection:bg-black/10 dark:selection:bg-white/10" : ""}`}
                 style={{
                   textAlign,
                   writingMode: isVertical ? "vertical-rl" : "horizontal-tb",

@@ -117,11 +117,13 @@ export function Sidebar({
         <div className="flex flex-col gap-2">
           {needsResume && !dirHandle && (
             <button onClick={onResumeFolder} className={`flex-1 border ${colors.borderStrong} py-2 font-bold text-[10px] ${colors.textMain} ${colors.accentBgHover} transition-colors bg-slate-800/50`}>
-              RESUME ACCESS
+              再接続する (RESUME)
             </button>
           )}
           <div className="flex gap-2">
-            <button onClick={onNewFolder} className={`flex-1 border ${colors.border} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>+ NEW FOLDER</button>
+            <button onClick={onNewFolder} className={`flex-1 border ${colors.border} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>
+              フォルダーを開く (CONNECT)
+            </button>
           </div>
         </div>
 
@@ -129,7 +131,7 @@ export function Sidebar({
           onClick={() => fileInputRef.current?.click()}
           className={`w-full mt-3 border ${colors.border} border-dashed py-2 text-[10px] ${colors.textSub} ${colors.accentBgHover} flex flex-col items-center justify-center gap-1 transition-colors`}>
            <span className="font-bold">↓ DIRECTORY IMPORT</span>
-           <span className="text-[8px] opacity-70">VIEWER MODE / iFrame SAFE</span>
+           <span className="text-[8px] opacity-70">MEMORY ONLY / iFrame SAFE</span>
         </button>
 
         <input 
