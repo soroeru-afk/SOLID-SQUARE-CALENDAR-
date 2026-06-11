@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { LogFile } from "@/lib/fs";
 import { getCalendarDays, toYYYYMMDD, formatTimeStr } from "@/lib/date-utils";
 import { Theme, getThemeColors } from "@/lib/theme";
@@ -18,6 +19,23 @@ export function GridSqView({
   showLogTitles,
   cellAspectRatio = "FREE",
 }: any) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const days = getCalendarDays(
     currentDate.getFullYear(),
     currentDate.getMonth(),
@@ -27,13 +45,47 @@ export function GridSqView({
   const colors = getThemeColors(theme as Theme);
 
   // Calculate overall grid aspect ratio based on cell aspect ratio (7 columns, 5 rows)
+  let ratioValue: number | null = null;
   let gridAspectRatio: string | null = null;
   if (cellAspectRatio === "1:1") {
     gridAspectRatio = "7 / 5";
+    ratioValue = 7 / 5;
   } else if (cellAspectRatio === "4:3") {
     gridAspectRatio = "28 / 15"; // (7*4) / (5*3)
+    ratioValue = 28 / 15;
   } else if (cellAspectRatio === "3:2") {
     gridAspectRatio = "21 / 10"; // (7*3) / (5*2)
+    ratioValue = 21 / 10;
+  }
+
+  // Calculate dimensions to fit aspect ratio within parent dimensions
+  let gridStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    display: "grid",
+  };
+
+  if (ratioValue && dimensions.width > 0 && dimensions.height > 0) {
+    const parentRatio = dimensions.width / dimensions.height;
+    if (parentRatio > ratioValue) {
+      // Parent is wider than target ratio: lock height, calculate width
+      const calculatedWidth = dimensions.height * ratioValue;
+      gridStyle = {
+        width: `${calculatedWidth}px`,
+        height: `${dimensions.height}px`,
+        aspectRatio: gridAspectRatio!,
+        display: "grid",
+      };
+    } else {
+      // Parent is taller than target ratio: lock width, calculate height
+      const calculatedHeight = dimensions.width / ratioValue;
+      gridStyle = {
+        width: `${dimensions.width}px`,
+        height: `${calculatedHeight}px`,
+        aspectRatio: gridAspectRatio!,
+        display: "grid",
+      };
+    }
   }
 
   const logsByDate = logs.reduce(
@@ -82,124 +134,120 @@ export function GridSqView({
       </div>
 
       {/* Grid Wrapper */}
-      <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+      <div 
+        ref={containerRef}
+        className="flex-1 min-h-0 flex items-center justify-center overflow-hidden w-full h-full relative"
+      >
         <div
           className="grid grid-cols-7 grid-rows-5 gap-[2px] overflow-hidden transition-all duration-300"
-          style={{
-            aspectRatio: gridAspectRatio || undefined,
-            width: gridAspectRatio ? "auto" : "100%",
-            height: gridAspectRatio ? "auto" : "100%",
-            maxWidth: "100%",
-            maxHeight: "100%",
-            display: "grid",
-          } as any}
+          style={gridStyle}
         >
-        {days.slice(0, 35).map((dateStrObj: Date, idx: number) => {
-          const dateStr = toYYYYMMDD(dateStrObj);
-          const isCurrentMonth =
-            dateStrObj.getMonth() === currentDate.getMonth();
-          const dayLogs = getLogsForDay(dateStr);
-          const isToday = dateStr === todayYYYYMMDD;
-          
-          const isRightSide = (idx % 7) >= 4;
-          const isBottom = idx >= 21;
+          {days.slice(0, 35).map((dateStrObj: Date, idx: number) => {
+            const dateStr = toYYYYMMDD(dateStrObj);
+            const isCurrentMonth =
+              dateStrObj.getMonth() === currentDate.getMonth();
+            const dayLogs = getLogsForDay(dateStr);
+            const isToday = dateStr === todayYYYYMMDD;
+            
+            const isRightSide = (idx % 7) >= 4;
+            const isBottom = idx >= 21;
 
-          return (
-            <div
-              key={dateStr + idx}
-              className={`relative border flex flex-col group transition-all duration-300 hover:z-50 hover:opacity-100
-                ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} opacity-50`} 
-                ${isToday ? `ring-2 ring-inset ${colors.ring}` : ""}
-              `}
-            >
-              {/* DEFAULT VIEW (CLIPPED) */}
-              <div className="absolute inset-0 p-1 flex flex-col overflow-hidden pointer-events-none group-hover:opacity-0 transition-opacity">
-                {/* DATE NUMBER */}
-                <div
-                  className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 ${isToday ? colors.dateNumToday : colors.dateNum}`}
-                  style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}
-                >
-                  {dateStrObj.getDate()}
+            return (
+              <div
+                key={dateStr + idx}
+                className={`relative border flex flex-col group transition-all duration-300 hover:z-50 hover:opacity-100
+                  ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} opacity-50`} 
+                  ${isToday ? `ring-2 ring-inset ${colors.ring}` : ""}
+                `}
+              >
+                {/* DEFAULT VIEW (CLIPPED) */}
+                <div className="absolute inset-0 p-1 flex flex-col overflow-hidden pointer-events-none group-hover:opacity-0 transition-opacity">
+                  {/* DATE NUMBER */}
+                  <div
+                    className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 ${isToday ? colors.dateNumToday : colors.dateNum}`}
+                    style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}
+                  >
+                    {dateStrObj.getDate()}
+                  </div>
+
+                  <div className="flex-1 mt-6 flex flex-col gap-[2px]">
+                    {showLogTitles &&
+                      dayLogs.slice(0, 3).map((log: LogFile) => (
+                        <div
+                          key={log.name}
+                          className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate pointer-events-auto ${colors.shadow}`}
+                          style={{
+                            fontSize: `${textSize}px`,
+                            fontFamily: textFont,
+                          }}
+                        >
+                          {log.title}
+                        </div>
+                      ))}
+                    {showLogTitles && dayLogs.length > 3 && (
+                      <div
+                        className={`text-[9px] ${colors.textSub} mt-0.5 pl-1 font-bold`}
+                      >
+                        + {dayLogs.length - 3} LOGS
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex-1 mt-6 flex flex-col gap-[2px]">
-                  {showLogTitles &&
-                    dayLogs.slice(0, 3).map((log: LogFile) => (
+                {/* OVERLAY EXPANDED VIEW (VISIBLE ON HOVER) */}
+                <div
+                  className={`absolute ${isBottom ? 'bottom-0' : 'top-0'} ${isRightSide ? 'right-0' : 'left-0'} min-h-full ${colors.itemBg} border ${colors.borderStrong} ${colors.shadowLg} flex flex-col pointer-events-auto overlay-preview z-50 overflow-y-auto no-scrollbar`}
+                  style={{
+                    width: `${previewWidth}%`,
+                    maxHeight: `${previewHeight}px`,
+                    "--preview-opacity": previewOpacity / 100,
+                  } as React.CSSProperties}
+                >
+                  {/* PREVIEW HEADER */}
+                  <div className={`sticky top-0 left-0 w-full flex items-center justify-between z-30 p-1 mb-1 border-b ${colors.borderStrong} ${colors.itemBg}`}>
+                    <button
+                      onClick={() => onNewLog(dateStrObj)}
+                      className={`shrink-0 w-4 h-4 ${colors.panelBg} border ${colors.borderStrong} ${colors.textSub} flex items-center justify-center text-[10px] ${colors.accentBgHover} ${colors.textSubHover} cursor-pointer shadow-sm transition-colors`}
+                    >
+                      +
+                    </button>
+                    <div 
+                      className={`font-bold text-right leading-none ${isToday ? colors.dateNumToday : colors.textMain}`}
+                      style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
+                    >
+                      {dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} {dateStrObj.getDate()}
+                    </div>
+                  </div>
+
+                  {/* LOG STACK */}
+                  <div className="relative z-20 flex flex-col gap-[2px] p-1 pt-0">
+                    {dayLogs.map((log: LogFile) => (
                       <div
                         key={log.name}
-                        className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate pointer-events-auto ${colors.shadow}`}
+                        onClick={() => onLogClick(log)}
+                        className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate cursor-pointer ${colors.itemBgHover} ${colors.borderHover} ${colors.shadow} transition-colors`}
+                        title={log.title}
                         style={{
                           fontSize: `${textSize}px`,
                           fontFamily: textFont,
                         }}
                       >
+                        <span className="opacity-50 mr-1">
+                          {formatTimeStr(log.timeStr)}
+                        </span>
                         {log.title}
                       </div>
                     ))}
-                  {showLogTitles && dayLogs.length > 3 && (
-                    <div
-                      className={`text-[9px] ${colors.textSub} mt-0.5 pl-1 font-bold`}
-                    >
-                      + {dayLogs.length - 3} LOGS
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* OVERLAY EXPANDED VIEW (VISIBLE ON HOVER) */}
-              <div
-                className={`absolute ${isBottom ? 'bottom-0' : 'top-0'} ${isRightSide ? 'right-0' : 'left-0'} min-h-full ${colors.itemBg} border ${colors.borderStrong} ${colors.shadowLg} flex flex-col pointer-events-auto overlay-preview z-50 overflow-y-auto no-scrollbar`}
-                style={{
-                  width: `${previewWidth}%`,
-                  maxHeight: `${previewHeight}px`,
-                  "--preview-opacity": previewOpacity / 100,
-                } as React.CSSProperties}
-              >
-                {/* PREVIEW HEADER */}
-                <div className={`sticky top-0 left-0 w-full flex items-center justify-between z-30 p-1 mb-1 border-b ${colors.borderStrong} ${colors.itemBg}`}>
-                  <button
-                    onClick={() => onNewLog(dateStrObj)}
-                    className={`shrink-0 w-4 h-4 ${colors.panelBg} border ${colors.borderStrong} ${colors.textSub} flex items-center justify-center text-[10px] ${colors.accentBgHover} ${colors.textSubHover} cursor-pointer shadow-sm transition-colors`}
-                  >
-                    +
-                  </button>
-                  <div 
-                    className={`font-bold text-right leading-none ${isToday ? colors.dateNumToday : colors.textMain}`}
-                    style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
-                  >
-                    {dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} {dateStrObj.getDate()}
+                    {dayLogs.length === 0 && (
+                      <div className={`text-[9px] ${colors.textDim} mt-1 pl-1`}>
+                        NO LOGS
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* LOG STACK */}
-                <div className="relative z-20 flex flex-col gap-[2px] p-1 pt-0">
-                  {dayLogs.map((log: LogFile) => (
-                    <div
-                      key={log.name}
-                      onClick={() => onLogClick(log)}
-                      className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate cursor-pointer ${colors.itemBgHover} ${colors.borderHover} ${colors.shadow} transition-colors`}
-                      title={log.title}
-                      style={{
-                        fontSize: `${textSize}px`,
-                        fontFamily: textFont,
-                      }}
-                    >
-                      <span className="opacity-50 mr-1">
-                        {formatTimeStr(log.timeStr)}
-                      </span>
-                      {log.title}
-                    </div>
-                  ))}
-                  {dayLogs.length === 0 && (
-                    <div className={`text-[9px] ${colors.textDim} mt-1 pl-1`}>
-                      NO LOGS
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       </div>
     </div>
