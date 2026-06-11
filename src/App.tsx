@@ -385,9 +385,9 @@ export default function App() {
 
     let newIndex = currentIndex;
     if (dir === "PREV") {
-      newIndex = currentIndex - 1; // newer file (higher up in the visual list)
+      newIndex = currentIndex + 1; // older file (past)
     } else {
-      newIndex = currentIndex + 1; // older file
+      newIndex = currentIndex - 1; // newer file (future)
     }
 
     if (newIndex >= 0 && newIndex < logs.length) {
@@ -1089,8 +1089,8 @@ export default function App() {
       {/* EDITOR */}
       {isEditorOpen && selectedLog && (() => {
         const currentIndex = logs.findIndex((l) => l.name === selectedLog.name);
-        const hasPrev = currentIndex > 0;
-        const hasNext = currentIndex >= 0 && currentIndex < logs.length - 1;
+        const hasPrev = currentIndex >= 0 && currentIndex < logs.length - 1; // older file exists (past)
+        const hasNext = currentIndex > 0; // newer file exists (future)
         return (
           <EditorModal
             log={selectedLog}

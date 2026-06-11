@@ -213,14 +213,14 @@ export function EditorModal({
       if (!isEditing && e.target instanceof HTMLElement) {
          const tagName = e.target.tagName.toLowerCase();
          if (tagName !== "textarea" && tagName !== "input") {
-            if (e.key === "k" && hasPrev && onNavigate) {
-               e.preventDefault();
-               onNavigate('PREV');
-            }
-            if (e.key === "j" && hasNext && onNavigate) {
-               e.preventDefault();
-               onNavigate('NEXT');
-            }
+             if (e.key === "k" && hasNext && onNavigate) {
+                e.preventDefault();
+                onNavigate('NEXT');
+             }
+             if (e.key === "j" && hasPrev && onNavigate) {
+                e.preventDefault();
+                onNavigate('PREV');
+             }
          }
       }
     };
@@ -485,7 +485,7 @@ export function EditorModal({
                   <button
                     onClick={() => hasPrev && onNavigate('PREV')}
                     disabled={!hasPrev}
-                    title="新しく古いファイルへ"
+                    title="古いファイルへ（過去）"
                     className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasPrev ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     PREV
@@ -493,7 +493,7 @@ export function EditorModal({
                   <button
                     onClick={() => hasNext && onNavigate('NEXT')}
                     disabled={!hasNext}
-                    title="古いファイルへ"
+                    title="新しいファイルへ（未来）"
                     className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasNext ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     NEXT
