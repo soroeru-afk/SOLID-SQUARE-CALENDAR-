@@ -141,7 +141,7 @@ export function GridSqView({
       {/* Grid Wrapper */}
       <div 
         ref={containerRef}
-        className="flex-1 min-h-0 flex items-center justify-center overflow-hidden w-full h-full relative"
+        className="flex-1 min-h-0 flex items-start justify-center overflow-hidden w-full h-full relative"
       >
         {/* Unified aspect-ratio scaling container */}
         <div 
