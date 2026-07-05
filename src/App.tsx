@@ -428,13 +428,23 @@ export default function App() {
         let extractedTitle = "UNTITLED";
         const contentToSearch = newContent.trim();
         if (contentToSearch) {
-          const match = contentToSearch.match(
-            /^[\s\S]*?(?:[。！？\n]|[.!?](?:\s|$))/,
-          );
-          if (match) {
-            extractedTitle = match[0].trim();
-          } else {
-            extractedTitle = contentToSearch.trim();
+          const lines = contentToSearch.split("\n").map(l => l.trim()).filter(Boolean);
+          if (lines.length > 0) {
+            const firstLine = lines[0];
+            const isEmojiOrSymbolOnly = /^[^\w\s\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff\uff66-\uff9f]{1,4}$/u.test(firstLine);
+            if (isEmojiOrSymbolOnly && lines.length > 1) {
+              const secondLine = lines[1];
+              const match = secondLine.match(/^[^。！？.!?]*(?:[。！？]|[.!?](?:\s|$))?/);
+              const secondLineFirstSentence = match ? match[0].trim() : secondLine;
+              extractedTitle = `${firstLine} ${secondLineFirstSentence}`;
+            } else {
+              const match = firstLine.match(/^[^。！？.!?]*(?:[。！？]|[.!?](?:\s|$))?/);
+              if (match && match[0].trim()) {
+                extractedTitle = match[0].trim();
+              } else {
+                extractedTitle = firstLine;
+              }
+            }
           }
         }
 
