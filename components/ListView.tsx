@@ -23,7 +23,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
   return (
     <div className={`h-full flex flex-col p-4 w-full ${colors.textMain} relative`}>
       <div className={`flex-none flex items-center justify-between mb-4 border-b ${colors.border} pb-2 px-2`}>
-         <div className={`text-[10px] ${colors.textSub} tracking-widest uppercase`}>04 DATA BANKS</div>
+         <div className={`text-[10px] ${colors.textMain} tracking-widest uppercase`}>04 DATA BANKS</div>
          <div className={`text-[10px] ${colors.textSub} tracking-widest flex gap-3`}>
            <span>SORT: <span className={`${colors.textMain}`}>DATE ↓</span></span>
            <span className={`${colors.textMain} font-bold`}>LIST VIEW</span>
@@ -49,7 +49,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                    >
                      {dd}
                    </div>
-                   <div className={`text-[10px] ${colors.textSub} font-bold mt-1 text-center`}>{dName}</div>
+                   <div className={`text-[10px] ${colors.textMain} font-bold mt-1 text-center`}>{dName}</div>
                    <button 
                      onClick={() => onNewLog(dateObj)}
                      className={`absolute -right-2 top-0 translate-x-full opacity-0 group-hover:opacity-100 text-[10px] ${colors.textSub} ${colors.textSubHover} border ${colors.borderStrong} ${colors.borderHover} ${colors.panelBg} px-2 py-0.5 transition-colors whitespace-nowrap`}

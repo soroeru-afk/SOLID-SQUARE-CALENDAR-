@@ -1,4 +1,4 @@
-export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "ROSE";
+export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "RED";
 export type TextSize = "SM" | "MD" | "LG";
 export type FontType = "SANS" | "MONO" | "SERIF";
 
@@ -10,6 +10,7 @@ export function getThemeColors(theme: Theme) {
       panelBg: "bg-black", // Header and Sidebar look
       itemBg: "bg-zinc-900",
       itemBgHover: "hover:bg-zinc-800",
+      bgHover: "hover:bg-zinc-900",
       border: "border-zinc-800",
       borderStrong: "border-zinc-700",
       borderHover: "hover:border-zinc-600",
@@ -29,29 +30,30 @@ export function getThemeColors(theme: Theme) {
     };
   }
 
-  if (theme === "ROSE") {
+  if (theme === "RED") {
     return {
-      isDark: false,
-      bg: "bg-[#FDF8F8]",
-      panelBg: "bg-[#FFFFFF]",
-      itemBg: "bg-[#FFFFFF]",
-      itemBgHover: "hover:bg-[#F9EFF0]",
-      border: "border-[#DBC9CB]",
-      borderStrong: "border-[#8C6D70]",
-      borderHover: "hover:border-[#915B61]",
-      textMain: "text-[#332225]",
-      textSub: "text-[#765C5F]",
-      textSubHover: "hover:text-[#8C484F]",
-      textDim: "text-[#9E8789]",
-      dateNum: "text-[#E6D6D8]",
-      dateNumToday: "text-[#915B61]",
-      accentBg: "bg-[#F5D8DB]",
-      accentBgHover: "hover:bg-[#E8C2C6]",
-      activeBg: "bg-[#EDDCE0]",
-      activeText: "text-[#4A3B3E]",
-      ring: "ring-[#915B61]/70",
-      shadow: "shadow-sm shadow-[#8C6D70]/10",
-      shadowLg: "shadow-xl shadow-[#8C6D70]/20",
+      isDark: true,
+      bg: "bg-[#0f0404]",
+      panelBg: "bg-[#080202]", // Header and Sidebar look
+      itemBg: "bg-[#1f0909]",
+      itemBgHover: "hover:bg-[#331111]",
+      bgHover: "hover:bg-[#1f0909]",
+      border: "border-[#331111]",
+      borderStrong: "border-[#4d1a1a]",
+      borderHover: "hover:border-[#662222]",
+      textMain: "text-[#fdf2f2]",
+      textSub: "text-[#c26666]",
+      textSubHover: "hover:text-[#e68a8a]",
+      textDim: "text-[#8a3333]",
+      dateNum: "text-[#4d1a1a]",
+      dateNumToday: "text-[#fdf2f2]",
+      accentBg: "bg-[#1f0909]",
+      accentBgHover: "hover:bg-[#331111]",
+      activeBg: "bg-[#331111]",
+      activeText: "text-[#fdf2f2]",
+      ring: "ring-[#4d1a1a]",
+      shadow: "shadow-none",
+      shadowLg: "shadow-2xl shadow-black",
     };
   }
 
@@ -62,6 +64,7 @@ export function getThemeColors(theme: Theme) {
     panelBg: isDark ? "bg-[#060A11]" : "bg-white", // Sidebar etc
     itemBg: isDark ? "bg-[#0E1724]" : "bg-white", // Cards
     itemBgHover: isDark ? "hover:bg-[#131F33]" : "hover:bg-slate-50",
+    bgHover: isDark ? "hover:bg-[#0E1724]" : "hover:bg-slate-100",
     border: isDark ? "border-[#1C2C40]" : "border-slate-300",
     borderStrong: isDark ? "border-[#2B405C]" : "border-slate-400",
     borderHover: isDark ? "hover:border-[#385273]" : "hover:border-slate-500",

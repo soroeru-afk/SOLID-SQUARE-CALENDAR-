@@ -121,7 +121,6 @@ export default function App() {
     useState<boolean>(false);
   const [showLogTitlesList, setShowLogTitlesList] = useState<boolean>(true);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
-  const [cellAspectRatio, setCellAspectRatio] = useState<"FREE" | "1:1" | "4:3" | "3:2">("FREE");
   const [settingsTab, setSettingsTab] = useState<
     "GENERAL" | "EDITOR" | "AUDIO"
   >("GENERAL");
@@ -135,64 +134,6 @@ export default function App() {
   const [speechRate, setSpeechRate] = useState<number>(2.0);
   const [speechVolume, setSpeechVolume] = useState<number>(1.0);
   const [speechPitch, setSpeechPitch] = useState<number>(1.0);
-  const [availableVoices, setAvailableVoices] = useState<any[]>([]);
-
-  // Preload and get available Japanese voices
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-
-    const updateVoices = () => {
-      const allVoices = window.speechSynthesis.getVoices();
-      const jaVoices = allVoices.filter((v) => {
-        const isJa = v.lang.includes("ja-JP") || v.lang.includes("ja_JP");
-        if (!isJa) return false;
-
-        const nameLower = v.name.toLowerCase();
-        // 1. Googleボイスの除外
-        if (nameLower.includes("google")) return false;
-        // 2. 「日本語」という文字列を含むものの除外
-        if (nameLower.includes("日本語") || nameLower.includes("にほんご") || nameLower.includes("ﾆﾎﾝｺﾞ")) return false;
-        // 3. 開発用サーバーボイスなどの除外
-        if (nameLower.includes("server speech") || nameLower.includes("harukarus")) return false;
-
-        // 4. プロバイダ名を除いたシンプルな名前をチェック
-        const nameWithoutProvider = v.name.replace(/Microsoft |Google |Online \(Natural\) |Natural /g, "");
-        const nameClean = nameWithoutProvider.toLowerCase().trim();
-        // 単に "japanese" や "japan" といった汎用名のみのものは除外
-        if (
-          nameClean === "japanese" ||
-          nameClean === "japan" ||
-          nameClean === "japanese (japan)" ||
-          nameClean.startsWith("japanese ")
-        ) {
-          return false;
-        }
-
-        return true;
-      });
-      setAvailableVoices(jaVoices);
-    };
-
-    updateVoices();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = updateVoices;
-    }
-  }, []);
-
-  // Auto-adjust default speechVoice to first available Japanese voice if legacy default doesn't exist
-  useEffect(() => {
-    if (availableVoices.length > 0) {
-      const hasSelectedExists = availableVoices.some(v => v.name === speechVoice || v.name.includes(speechVoice));
-      if (!hasSelectedExists) {
-        const ichiro = availableVoices.find(v => v.name.includes("Ichiro"));
-        if (ichiro) {
-          setSpeechVoice(ichiro.name);
-        } else {
-          setSpeechVoice(availableVoices[0].name);
-        }
-      }
-    }
-  }, [availableVoices, speechVoice]);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [needsResume, setNeedsResume] = useState<any | null>(null);
@@ -203,7 +144,7 @@ export default function App() {
       const savedSettings = localStorage.getItem("solid-square-settings");
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
-        if (parsed.theme) setTheme(parsed.theme);
+        if (parsed.theme) setTheme(parsed.theme === "ROSE" ? "RED" : parsed.theme);
         if (parsed.textSize) setTextSize(parsed.textSize);
         if (parsed.previewWidth) setPreviewWidth(parsed.previewWidth);
         if (parsed.previewHeight) setPreviewHeight(parsed.previewHeight);
@@ -223,7 +164,6 @@ export default function App() {
         if (parsed.showLogTitlesList !== undefined)
           setShowLogTitlesList(parsed.showLogTitlesList);
         if (parsed.viewMode) setViewMode(parsed.viewMode);
-        if (parsed.cellAspectRatio) setCellAspectRatio(parsed.cellAspectRatio);
 
         if (parsed.speechVoice) setSpeechVoice(parsed.speechVoice);
         if (parsed.speechRate) setSpeechRate(parsed.speechRate);
@@ -293,7 +233,6 @@ export default function App() {
           showLogTitlesSquare,
           showLogTitlesList,
           viewMode,
-          cellAspectRatio,
           speechVoice,
           speechRate,
           speechVolume,
@@ -319,7 +258,6 @@ export default function App() {
     showLogTitlesSquare,
     showLogTitlesList,
     viewMode,
-    cellAspectRatio,
     speechVoice,
     speechRate,
     speechVolume,
@@ -447,9 +385,9 @@ export default function App() {
 
     let newIndex = currentIndex;
     if (dir === "PREV") {
-      newIndex = currentIndex + 1; // older file (past)
+      newIndex = currentIndex + 1; // older file
     } else {
-      newIndex = currentIndex - 1; // newer file (future)
+      newIndex = currentIndex - 1; // newer file
     }
 
     if (newIndex >= 0 && newIndex < logs.length) {
@@ -629,10 +567,29 @@ export default function App() {
 
   const colors = getThemeColors(theme as Theme);
 
+  let sliderBorder, sliderTrack, sliderThumb;
+  if (theme === "LIGHT") {
+    sliderBorder = "#cbd5e1";
+    sliderTrack = "#e2e8f0";
+    sliderThumb = "#64748b";
+  } else if (theme === "RED") {
+    sliderBorder = "#4f1818";
+    sliderTrack = "#260909";
+    sliderThumb = "#b85454";
+  } else if (theme === "MONOTONE") {
+    sliderBorder = "#3f3f46";
+    sliderTrack = "#18181b";
+    sliderThumb = "#a1a1aa";
+  } else {
+    sliderBorder = "#334155";
+    sliderTrack = "#1e293b";
+    sliderThumb = "#94a3b8";
+  }
+
   const sliderStyle = {
-    "--slider-border": theme === "LIGHT" ? "#cbd5e1" : "#334155",
-    "--slider-track": theme === "LIGHT" ? "#e2e8f0" : "#1e293b",
-    "--slider-thumb": theme === "LIGHT" ? "#64748b" : "#94a3b8",
+    "--slider-border": sliderBorder,
+    "--slider-track": sliderTrack,
+    "--slider-thumb": sliderThumb,
   } as React.CSSProperties;
 
   const showLogTitles =
@@ -710,7 +667,7 @@ export default function App() {
                 {/* THEME */}
                 <div className="flex flex-col gap-2">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>THEME</span>
                     <span className={colors.textMain}>{theme}</span>
@@ -738,10 +695,10 @@ export default function App() {
                       BLACK
                     </button>
                     <button
-                      onClick={() => setTheme("ROSE")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "ROSE" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
+                      onClick={() => setTheme("RED")}
+                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "RED" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
                     >
-                      ROSE
+                      RED
                     </button>
                   </div>
                 </div>
@@ -749,7 +706,7 @@ export default function App() {
                 {/* SYSTEM FONT */}
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>SYSTEM FONT</span>
                   </div>
@@ -791,7 +748,7 @@ export default function App() {
                 {/* DATE NUMBER */}
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>DATE FONT</span>
                   </div>
@@ -819,7 +776,7 @@ export default function App() {
                     />
                   </div>
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>SIZE</span>
                     <span className={colors.textMain}>{dateSize}PX</span>
@@ -835,30 +792,6 @@ export default function App() {
                     style={sliderStyle}
                   />
                 </div>
-
-                {/* CELL RATIO */}
-                <div className="flex flex-col gap-2">
-                  <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
-                  >
-                    <span>CELL RATIO</span>
-                    <span className={colors.textMain}>{cellAspectRatio === "FREE" ? "FREE" : cellAspectRatio}</span>
-                  </div>
-                  <div
-                    className="flex bg-black/10 border border-black/20 p-0.5"
-                    style={{ borderColor: "var(--border-color)" }}
-                  >
-                    {(["FREE", "1:1", "4:3", "3:2"] as const).map((ratio) => (
-                      <button
-                        key={ratio}
-                        onClick={() => setCellAspectRatio(ratio)}
-                        className={`flex-1 py-1 text-[10px] font-bold font-mono tracking-wider ${cellAspectRatio === ratio ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                      >
-                        {ratio}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
@@ -867,7 +800,7 @@ export default function App() {
                 {/* LOG TEXT */}
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>LOG FONT</span>
                   </div>
@@ -895,7 +828,7 @@ export default function App() {
                     />
                   </div>
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>PREVIEW SIZE</span>
                     <span className={colors.textMain}>{textSize}PX</span>
@@ -912,7 +845,7 @@ export default function App() {
                   />
 
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-3`}
                   >
                     <span>PREVIEW WIDTH</span>
                     <span className={colors.textMain}>{previewWidth}%</span>
@@ -929,7 +862,7 @@ export default function App() {
                   />
 
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-3`}
                   >
                     <span>PREVIEW HEIGHT</span>
                     <span className={colors.textMain}>{previewHeight}PX</span>
@@ -946,7 +879,7 @@ export default function App() {
                   />
 
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-3`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-3`}
                   >
                     <span>PREVIEW OPACITY</span>
                     <span className={colors.textMain}>{previewOpacity}%</span>
@@ -965,7 +898,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>EDITOR SIZE</span>
                     <span className={colors.textMain}>{editorTextSize}PX</span>
@@ -990,7 +923,7 @@ export default function App() {
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>VOICE</span>
                   </div>
@@ -1000,25 +933,36 @@ export default function App() {
                       onChange={(e) => setSpeechVoice(e.target.value)}
                       className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                     >
-                      {availableVoices.length > 0 ? (
-                        availableVoices.map((voice) => (
-                          <option
-                            key={voice.name}
-                            value={voice.name}
-                            className="bg-slate-900 text-slate-100 py-1"
-                          >
-                            {voice.name.replace(/Microsoft |Google |Online \(Natural\) |Natural /g, "").toUpperCase()}
-                          </option>
-                        ))
-                      ) : (
-                        <>
-                          <option value="Ichiro" className="bg-slate-900 text-slate-100 py-1">Ichiro (JP)</option>
-                          <option value="Ayumi" className="bg-slate-900 text-slate-100 py-1">Ayumi (JP)</option>
-                          <option value="Haruka" className="bg-slate-900 text-slate-100 py-1">Haruka (JP)</option>
-                          <option value="Keita" className="bg-slate-900 text-slate-100 py-1">Keita (JP)</option>
-                          <option value="Nanami" className="bg-slate-900 text-slate-100 py-1">Nanami (JP)</option>
-                        </>
-                      )}
+                      <option
+                        value="Ichiro"
+                        className="bg-slate-900 text-slate-100 py-1"
+                      >
+                        Ichiro (JP)
+                      </option>
+                      <option
+                        value="Ayumi"
+                        className="bg-slate-900 text-slate-100 py-1"
+                      >
+                        Ayumi (JP)
+                      </option>
+                      <option
+                        value="Haruka"
+                        className="bg-slate-900 text-slate-100 py-1"
+                      >
+                        Haruka (JP)
+                      </option>
+                      <option
+                        value="Keita"
+                        className="bg-slate-900 text-slate-100 py-1"
+                      >
+                        Keita (JP)
+                      </option>
+                      <option
+                        value="Nanami"
+                        className="bg-slate-900 text-slate-100 py-1"
+                      >
+                        Nanami (JP)
+                      </option>
                     </select>
                     <ChevronDown
                       size={14}
@@ -1029,7 +973,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>SPEED (RATE)</span>
                     <span className={colors.textMain}>
@@ -1050,7 +994,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>VOLUME</span>
                     <span className={colors.textMain}>
@@ -1073,7 +1017,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-3">
                   <div
-                    className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
                   >
                     <span>PITCH</span>
                     <span className={colors.textMain}>
@@ -1138,7 +1082,6 @@ export default function App() {
               dateSize={dateSize}
               dateFont={dateFont}
               showLogTitles={showLogTitles}
-              cellAspectRatio={cellAspectRatio}
             />
           )}
 
@@ -1165,8 +1108,8 @@ export default function App() {
       {/* EDITOR */}
       {isEditorOpen && selectedLog && (() => {
         const currentIndex = logs.findIndex((l) => l.name === selectedLog.name);
-        const hasPrev = currentIndex >= 0 && currentIndex < logs.length - 1; // older file exists (past)
-        const hasNext = currentIndex > 0; // newer file exists (future)
+        const hasPrev = currentIndex >= 0 && currentIndex < logs.length - 1;
+        const hasNext = currentIndex > 0;
         return (
           <EditorModal
             log={selectedLog}

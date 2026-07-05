@@ -184,9 +184,6 @@ export function EditorModal({
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-    }
   }, []);
 
   const handleSave = useCallback(() => {
@@ -216,14 +213,14 @@ export function EditorModal({
       if (!isEditing && e.target instanceof HTMLElement) {
          const tagName = e.target.tagName.toLowerCase();
          if (tagName !== "textarea" && tagName !== "input") {
-             if (e.key === "k" && hasNext && onNavigate) {
-                e.preventDefault();
-                onNavigate('NEXT');
-             }
-             if (e.key === "j" && hasPrev && onNavigate) {
-                e.preventDefault();
-                onNavigate('PREV');
-             }
+            if (e.key === "k" && hasNext && onNavigate) {
+               e.preventDefault();
+               onNavigate('NEXT');
+            }
+            if (e.key === "j" && hasPrev && onNavigate) {
+               e.preventDefault();
+               onNavigate('PREV');
+            }
          }
       }
     };
@@ -285,7 +282,7 @@ export function EditorModal({
 
             {/* Toolbar */}
             <div
-              className={`flex items-center justify-between gap-x-4 gap-y-3 w-full text-[10px] uppercase tracking-wider ${colors.textSub} font-bold select-none flex-wrap overflow-x-auto no-scrollbar`}
+              className={`flex items-center justify-between gap-x-4 gap-y-3 w-full text-[10px] uppercase tracking-wider ${colors.textMain} font-bold select-none flex-wrap overflow-x-auto no-scrollbar`}
             >
               <div className="flex items-center gap-3 flex-wrap">
                 {/* Text Size Controls */}
@@ -488,7 +485,7 @@ export function EditorModal({
                   <button
                     onClick={() => hasPrev && onNavigate('PREV')}
                     disabled={!hasPrev}
-                    title="古いファイルへ（過去）"
+                    title="古いファイルへ"
                     className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasPrev ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     PREV
@@ -496,7 +493,7 @@ export function EditorModal({
                   <button
                     onClick={() => hasNext && onNavigate('NEXT')}
                     disabled={!hasNext}
-                    title="新しいファイルへ（未来）"
+                    title="新しいファイルへ"
                     className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasNext ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     NEXT

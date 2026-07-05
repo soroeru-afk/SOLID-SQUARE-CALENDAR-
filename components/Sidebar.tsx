@@ -37,7 +37,7 @@ export function Sidebar({
       
       {/* 01 TRACK INFO */}
       <div className={`p-4 border-b ${colors.border}`}>
-        <div className={`text-[9px] tracking-widest ${colors.textSub} mb-4 pb-1 border-b ${colors.border}`}>01 TRACK INFO</div>
+        <div className={`text-[9px] tracking-widest ${colors.textMain} mb-4 pb-1 border-b ${colors.border}`}>01 TRACK INFO</div>
         <div className="flex items-center justify-between mt-2">
            <button onClick={() => changeMonth(-1)} className={`${colors.textSub} ${colors.textSubHover} p-1 transition-colors px-2`}>&lt;</button>
            <div className="text-center cursor-pointer" onClick={() => {
@@ -76,7 +76,7 @@ export function Sidebar({
 
       {/* 02 FORMATION ENGINE */}
       <div className={`p-4 border-b ${colors.border}`}>
-        <div className={`text-[9px] tracking-widest ${colors.textSub} mb-4 pb-1 border-b ${colors.border}`}>02 FORMATION ENGINE</div>
+        <div className={`text-[9px] tracking-widest ${colors.textMain} mb-4 pb-1 border-b ${colors.border}`}>02 FORMATION ENGINE</div>
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button 
             onClick={() => setViewMode('SQUARE')}
@@ -99,7 +99,7 @@ export function Sidebar({
 
         {/* SHOW LOG TITLES TOGGLE (Moved here) */}
         <div className="flex flex-col gap-2 mt-4 pt-4 border-t" style={{ borderColor: 'var(--border-color, rgba(0,0,0,0.1))' }}>
-          <div className={`text-[10px] font-bold ${colors.textSub} tracking-widest flex items-center justify-between`}>
+          <div className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}>
             <span>SHOW LOG TITLES</span>
             <span className={colors.textMain}>{showLogTitles ? 'ON' : 'OFF'}</span>
           </div>
@@ -112,7 +112,7 @@ export function Sidebar({
 
       {/* 03 DATA SETS */}
       <div className="p-4 flex-1">
-        <div className={`text-[9px] tracking-widest ${colors.textSub} mb-4 pb-1 border-b ${colors.border}`}>03 DATA SETS</div>
+        <div className={`text-[9px] tracking-widest ${colors.textMain} mb-4 pb-1 border-b ${colors.border}`}>03 DATA SETS</div>
         
         <div className="flex flex-col gap-2">
           {needsResume && !dirHandle && (
@@ -152,7 +152,7 @@ export function Sidebar({
               >
                ✕
              </button>
-             <div className={`text-[10px] ${colors.textSub} mb-1 flex justify-between pr-6`}>
+             <div className={`text-[10px] ${colors.textMain} mb-1 flex justify-between pr-6`}>
                 <span>TOTAL LOGS:</span>
                 <span className={`${colors.textMain}`}>{logs.length}</span>
              </div>
