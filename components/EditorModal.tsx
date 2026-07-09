@@ -84,10 +84,13 @@ export function EditorModal({
     if (!text.trim()) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const selectedVoice =
-      voices.find((v) => v.name.includes(speechVoice)) ||
-      voices.find((v) => v.lang.includes("ja-JP"));
+      const voices = window.speechSynthesis.getVoices();
+      const fallbackVoice = voices.find((v) => v.name.includes("Ichiro")) || voices.find((v) => v.name.includes("Ayumi")) || voices.find((v) => v.name.includes("Haruka"));
+      const selectedVoice =
+        voices.find((v) => v.name.includes(speechVoice)) ||
+        fallbackVoice ||
+        voices.find((v) => v.lang.includes("ja-JP") && !v.name.includes("Keita") && !v.name.includes("Nanami")) ||
+        voices.find((v) => v.lang.includes("ja-JP"));
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
@@ -114,6 +117,11 @@ export function EditorModal({
 
   const handleTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     if (isEditing) return;
+
+    const textarea = e.currentTarget;
+    if (textarea.selectionStart !== textarea.selectionEnd) {
+      return; // 選択中なら無視
+    }
 
     if (isPlaying) {
       window.speechSynthesis.cancel();

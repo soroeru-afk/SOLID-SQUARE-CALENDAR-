@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { get, set, del } from "idb-keyval";
 import {
   LogFile,
@@ -961,18 +961,7 @@ export default function App() {
                       >
                         Haruka (JP)
                       </option>
-                      <option
-                        value="Keita"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Keita (JP)
-                      </option>
-                      <option
-                        value="Nanami"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Nanami (JP)
-                      </option>
+                      
                     </select>
                     <ChevronDown
                       size={14}
@@ -1147,3 +1136,4 @@ export default function App() {
     </div>
   );
 }
+
