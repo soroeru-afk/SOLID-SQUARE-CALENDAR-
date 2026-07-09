@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { get, set, del } from "idb-keyval";
 import {
   LogFile,
@@ -139,6 +139,16 @@ export default function App() {
   const [needsResume, setNeedsResume] = useState<any | null>(null);
 
   // --- LOCAL STORAGE & INDEXEDDB PERSISTENCE ---
+  useEffect(() => {
+    // 起動時に音声を事前ロード（1回目の再生で意図しないデフォルト音声になるのを防ぐ）
+    window.speechSynthesis.getVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const savedSettings = localStorage.getItem("solid-square-settings");
