@@ -28,6 +28,14 @@ const FONT_OPTIONS = [
   { label: "DEFAULT SANS", value: "ui-sans-serif, system-ui, sans-serif" },
   { label: "DEFAULT MONO", value: "ui-monospace, SFMono-Regular, monospace" },
   { label: "DEFAULT SERIF", value: "ui-serif, Georgia, serif" },
+  { label: "MEIRYO", value: '"Meiryo", "メイリオ", sans-serif' },
+  { label: "IMPACT", value: 'Impact, Charcoal, sans-serif' },
+  { label: "ARIAL BLACK", value: '"Arial Black", Gadget, sans-serif' },
+  {
+    label: "NOTO SANS JP BLACK",
+    value: '"Noto Sans JP", sans-serif',
+    family: "Noto+Sans+JP:wght@900",
+  },
   {
     label: "DELA GOTHIC ONE",
     value: '"Dela Gothic One", sans-serif',
