@@ -86,8 +86,18 @@ export function EditorModal({
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
     const selectedVoice =
+      voices.find((v) => v.name === speechVoice) ||
       voices.find((v) => v.name.includes(speechVoice)) ||
-      voices.find((v) => v.lang.includes("ja-JP"));
+      voices.find((v) => {
+        const name = v.name.toLowerCase();
+        if (speechVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一郎"))) return true;
+        if (speechVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥香"))) return true;
+        if (speechVoice === "Ayumi" && (name.includes("ayumi") || name.includes("あゆみ"))) return true;
+        if (speechVoice === "Ayaka" && (name.includes("ayaka") || name.includes("綾香"))) return true;
+        return false;
+      }) ||
+      voices.find((v) => v.lang.includes("ja-JP")) ||
+      voices.find((v) => v.lang.startsWith("ja"));
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;

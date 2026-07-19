@@ -145,6 +145,42 @@ export default function App() {
   const [speechRate, setSpeechRate] = useState<number>(2.0);
   const [speechVolume, setSpeechVolume] = useState<number>(1.0);
   const [speechPitch, setSpeechPitch] = useState<number>(1.0);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const updateVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      const jaVoices = allVoices.filter((v) => v.lang.startsWith("ja"));
+      setAvailableVoices(jaVoices);
+
+      // Auto-migrate simple names to full browser voice names
+      if (jaVoices.length > 0) {
+        setSpeechVoice((currentVoice) => {
+          if (jaVoices.some((v) => v.name === currentVoice)) {
+            return currentVoice;
+          }
+          const match = jaVoices.find((v) => {
+            const name = v.name.toLowerCase();
+            if (currentVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一郎"))) return true;
+            if (currentVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥香"))) return true;
+            if (currentVoice === "Ayumi" && (name.includes("ayumi") || name.includes("あゆみ"))) return true;
+            if (currentVoice === "Ayaka" && (name.includes("ayaka") || name.includes("綾香"))) return true;
+            return false;
+          });
+          if (match) {
+            return match.name;
+          }
+          return currentVoice;
+        });
+      }
+    };
+    updateVoices();
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [needsResume, setNeedsResume] = useState<any | null>(null);
@@ -1010,26 +1046,31 @@ export default function App() {
                     <select
                       value={speechVoice}
                       onChange={(e) => setSpeechVoice(e.target.value)}
-                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
+                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors`}
                     >
-                      <option
-                        value="Ichiro"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Ichiro (JP)
-                      </option>
-                      <option
-                        value="Ayumi"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Ayumi (JP)
-                      </option>
-                      <option
-                        value="Haruka"
-                        className="bg-slate-900 text-slate-100 py-1"
-                      >
-                        Haruka (JP)
-                      </option>
+                      {availableVoices.length > 0 ? (
+                        availableVoices.map((v) => (
+                          <option
+                            key={v.name}
+                            value={v.name}
+                            className="bg-slate-900 text-slate-100 py-1"
+                          >
+                            {v.name}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="Ichiro" className="bg-slate-900 text-slate-100 py-1">
+                            Ichiro (JP)
+                          </option>
+                          <option value="Ayumi" className="bg-slate-900 text-slate-100 py-1">
+                            Ayumi (JP)
+                          </option>
+                          <option value="Haruka" className="bg-slate-900 text-slate-100 py-1">
+                            Haruka (JP)
+                          </option>
+                        </>
+                      )}
                     </select>
                     <ChevronDown
                       size={14}
