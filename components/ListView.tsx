@@ -19,7 +19,9 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
     return logsByDate[dateStr] || [];
   };
 
-  const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const dayNames = theme === "JAPAN" 
+    ? ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"] 
+    : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   return (
     <div className={`h-full flex flex-col p-4 w-full ${colors.textMain} relative`}>
@@ -68,7 +70,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                    >
                      {dd}
                    </div>
-                   <div className={`text-[10px] ${dNameColor} font-bold mt-1 text-center`}>
+                   <div className={`text-xs ${dNameColor} font-bold mt-1 text-center`}>
                      {dName}
                      {holidayName && (
                         <div className="text-[8px] font-normal opacity-80 mt-1 max-w-[80px] leading-tight break-words">

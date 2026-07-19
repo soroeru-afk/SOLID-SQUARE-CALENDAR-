@@ -39,7 +39,9 @@ export function GridSqView({
     return logsByDate[dateStr] || [];
   };
 
-  const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const dayNames = theme === "JAPAN" 
+    ? ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"] 
+    : ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   const getHeaderColor = (idx: number) => {
     if (theme === "JAPAN") {
@@ -72,7 +74,7 @@ export function GridSqView({
         {dayNames.map((name, idx) => (
           <div
             key={name}
-            className={`text-[9px] font-bold ${getHeaderColor(idx)} tracking-widest text-center py-1`}
+            className={`text-xs font-bold ${getHeaderColor(idx)} tracking-widest text-center py-1`}
           >
             {name}
           </div>

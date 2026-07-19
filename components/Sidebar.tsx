@@ -22,9 +22,13 @@ export function Sidebar({
 }: any) {
   
   const yyyy = currentDate.getFullYear();
-  const mmName = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const mmName = theme === "JAPAN" 
+    ? `${currentDate.getMonth() + 1}月` 
+    : currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colors = getThemeColors(theme as Theme);
+
+  const miniDays = theme === "JAPAN" ? ['日', '月', '火', '水', '木', '金', '土'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -53,8 +57,8 @@ export function Sidebar({
 
         {/* MINI CALENDAR */}
         <div className="mt-4 grid grid-cols-7 gap-1 text-center select-none">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-            <div key={`col-${idx}`} className={`text-[8px] ${colors.textSub} font-bold opacity-50`}>{day}</div>
+          {miniDays.map((day, idx) => (
+            <div key={`col-${idx}`} className={`text-[10px] ${colors.textSub} font-bold opacity-50`}>{day}</div>
           ))}
           {Array.from({ length: new Date(yyyy, currentDate.getMonth(), 1).getDay() }).map((_, i) => (
             <div key={`empty-${i}`} />
