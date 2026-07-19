@@ -1,4 +1,4 @@
-export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "RED";
+export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "ROSE" | "JAPAN";
 export type TextSize = "SM" | "MD" | "LG";
 export type FontType = "SANS" | "MONO" | "SERIF";
 
@@ -10,7 +10,6 @@ export function getThemeColors(theme: Theme) {
       panelBg: "bg-black", // Header and Sidebar look
       itemBg: "bg-zinc-900",
       itemBgHover: "hover:bg-zinc-800",
-      bgHover: "hover:bg-zinc-900",
       border: "border-zinc-800",
       borderStrong: "border-zinc-700",
       borderHover: "hover:border-zinc-600",
@@ -30,14 +29,13 @@ export function getThemeColors(theme: Theme) {
     };
   }
 
-  if (theme === "RED") {
+  if (theme === "ROSE") {
     return {
       isDark: true,
       bg: "bg-[#0f0404]",
       panelBg: "bg-[#080202]", // Header and Sidebar look
       itemBg: "bg-[#1f0909]",
       itemBgHover: "hover:bg-[#331111]",
-      bgHover: "hover:bg-[#1f0909]",
       border: "border-[#331111]",
       borderStrong: "border-[#4d1a1a]",
       borderHover: "hover:border-[#662222]",
@@ -57,6 +55,32 @@ export function getThemeColors(theme: Theme) {
     };
   }
 
+  if (theme === "JAPAN") {
+    return {
+      isDark: false,
+      bg: "bg-[#f8f9fa]",
+      panelBg: "bg-white",
+      itemBg: "bg-white",
+      itemBgHover: "hover:bg-slate-50",
+      border: "border-slate-300",
+      borderStrong: "border-slate-400",
+      borderHover: "hover:border-slate-500",
+      textMain: "text-slate-900",
+      textSub: "text-slate-500",
+      textSubHover: "hover:text-slate-800",
+      textDim: "text-slate-400",
+      dateNum: "text-slate-900",
+      dateNumToday: "text-slate-900",
+      accentBg: "bg-slate-100",
+      accentBgHover: "hover:bg-slate-200",
+      activeBg: "bg-slate-200",
+      activeText: "text-slate-900",
+      ring: "ring-slate-400",
+      shadow: "shadow-none",
+      shadowLg: "shadow-xl shadow-slate-200/50",
+    };
+  }
+
   const isDark = theme === "NAVY";
   return {
     isDark,
@@ -64,7 +88,6 @@ export function getThemeColors(theme: Theme) {
     panelBg: isDark ? "bg-[#060A11]" : "bg-white", // Sidebar etc
     itemBg: isDark ? "bg-[#0E1724]" : "bg-white", // Cards
     itemBgHover: isDark ? "hover:bg-[#131F33]" : "hover:bg-slate-50",
-    bgHover: isDark ? "hover:bg-[#0E1724]" : "hover:bg-slate-100",
     border: isDark ? "border-[#1C2C40]" : "border-slate-300",
     borderStrong: isDark ? "border-[#2B405C]" : "border-slate-400",
     borderHover: isDark ? "hover:border-[#385273]" : "hover:border-slate-500",

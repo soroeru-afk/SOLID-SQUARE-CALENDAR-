@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "firebase": "^12.13.0",
     "idb-keyval": "^6.2.5",
+    "japanese-holidays": "^1.0.10",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.24",
     "postcss": "^8.5.6",

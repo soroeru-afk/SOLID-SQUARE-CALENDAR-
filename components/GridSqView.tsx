@@ -1,6 +1,7 @@
 import { LogFile } from "@/lib/fs";
 import { getCalendarDays, toYYYYMMDD, formatTimeStr } from "@/lib/date-utils";
 import { Theme, getThemeColors } from "@/lib/theme";
+import * as JapaneseHolidays from "japanese-holidays";
 
 export function GridSqView({
   currentDate,
@@ -40,6 +41,14 @@ export function GridSqView({
 
   const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
+  const getHeaderColor = (idx: number) => {
+    if (theme === "JAPAN") {
+      if (idx === 0) return "text-red-600";
+      if (idx === 6) return "text-blue-600";
+    }
+    return colors.textMain;
+  };
+
   return (
     <div className="h-full flex flex-col p-4 w-full">
       <div className="flex-none flex items-center justify-between mb-2">
@@ -60,10 +69,10 @@ export function GridSqView({
 
       {/* Header Row */}
       <div className="grid grid-cols-7 gap-1 flex-none mb-1">
-        {dayNames.map((name) => (
+        {dayNames.map((name, idx) => (
           <div
             key={name}
-            className={`text-[9px] font-bold ${colors.textMain} tracking-widest text-center py-1`}
+            className={`text-[9px] font-bold ${getHeaderColor(idx)} tracking-widest text-center py-1`}
           >
             {name}
           </div>
@@ -81,6 +90,19 @@ export function GridSqView({
           
           const isRightSide = (idx % 7) >= 4;
           const isBottom = idx >= 21;
+          const dayOfWeek = idx % 7;
+          
+          let dateNumColor = isToday ? colors.dateNumToday : colors.dateNum;
+          let holidayName = undefined;
+          
+          if (theme === "JAPAN") {
+            holidayName = JapaneseHolidays.isHoliday(dateStrObj);
+            if (dayOfWeek === 0 || holidayName) {
+              dateNumColor = "text-red-600";
+            } else if (dayOfWeek === 6) {
+              dateNumColor = "text-blue-600";
+            }
+          }
 
           return (
             <div
@@ -94,11 +116,18 @@ export function GridSqView({
               <div className="absolute inset-0 p-1 flex flex-col overflow-hidden pointer-events-none group-hover:opacity-0 transition-opacity">
                 {/* DATE NUMBER */}
                 <div
-                  className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 ${isToday ? colors.dateNumToday : colors.dateNum}`}
-                  style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}
+                  className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 flex flex-col items-end ${dateNumColor}`}
                 >
-                  {dateStrObj.getDate()}
+                  <span style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}>
+                    {dateStrObj.getDate()}
+                  </span>
                 </div>
+                
+                {holidayName && (
+                  <div className={`absolute bottom-1 right-1 text-[8px] font-sans font-bold opacity-80 whitespace-nowrap z-10 ${dateNumColor}`}>
+                    {holidayName}
+                  </div>
+                )}
 
                 <div className="flex-1 mt-6 flex flex-col gap-[2px]">
                   {showLogTitles &&
@@ -142,7 +171,7 @@ export function GridSqView({
                     +
                   </button>
                   <div 
-                    className={`font-bold text-right leading-none ${isToday ? colors.dateNumToday : colors.textMain}`}
+                    className={`font-bold text-right leading-none ${dateNumColor}`}
                     style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
                   >
                     {dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} {dateStrObj.getDate()}

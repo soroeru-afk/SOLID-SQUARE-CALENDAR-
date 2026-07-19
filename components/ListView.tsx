@@ -1,6 +1,7 @@
 import { LogFile } from '@/lib/fs';
 import { getMonthDays, toYYYYMMDD, formatTimeStr } from '@/lib/date-utils';
 import { Theme, getThemeColors } from '@/lib/theme';
+import * as JapaneseHolidays from "japanese-holidays";
 
 export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textSize, textFont, dateSize, dateFont, showLogTitles }: any) {
   const days = getMonthDays(currentDate.getFullYear(), currentDate.getMonth());
@@ -36,7 +37,25 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
            const dayLogs = getLogsForDay(dateStr);
            const isToday = dateStr === todayYYYYMMDD;
            const dd = dateObj.getDate();
-           const dName = dayNames[dateObj.getDay()];
+           const dayOfWeek = dateObj.getDay();
+           const dName = dayNames[dayOfWeek];
+
+           let dateNumColor = isToday ? colors.textMain : colors.textSub;
+           let dNameColor = colors.textMain;
+           let holidayName = undefined;
+
+           if (theme === "JAPAN") {
+             holidayName = JapaneseHolidays.isHoliday(dateObj);
+             if (dayOfWeek === 0 || holidayName) {
+               dateNumColor = "text-red-600";
+               dNameColor = "text-red-600";
+             } else if (dayOfWeek === 6) {
+               dateNumColor = "text-blue-600";
+               dNameColor = "text-blue-600";
+             } else {
+               dateNumColor = colors.textMain;
+             }
+           }
 
            return (
              <div key={dateStr} className={`w-full flex border-b ${colors.border} group`}>
@@ -44,12 +63,19 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                <div className={`w-32 flex-none flex flex-col items-center justify-center py-6 border-r ${colors.border}`}>
                  <div className="flex flex-col items-center relative pl-4">
                    <div 
-                     className={`font-bold leading-none ${isToday ? colors.textMain : colors.textSub}`}
+                     className={`font-bold leading-none ${dateNumColor}`}
                      style={{ fontSize: `${dateSize}px`, fontFamily: dateFont }}
                    >
                      {dd}
                    </div>
-                   <div className={`text-[10px] ${colors.textMain} font-bold mt-1 text-center`}>{dName}</div>
+                   <div className={`text-[10px] ${dNameColor} font-bold mt-1 text-center`}>
+                     {dName}
+                     {holidayName && (
+                        <div className="text-[8px] font-normal opacity-80 mt-1 max-w-[80px] leading-tight break-words">
+                          {holidayName}
+                        </div>
+                     )}
+                   </div>
                    <button 
                      onClick={() => onNewLog(dateObj)}
                      className={`absolute -right-2 top-0 translate-x-full opacity-0 group-hover:opacity-100 text-[10px] ${colors.textSub} ${colors.textSubHover} border ${colors.borderStrong} ${colors.borderHover} ${colors.panelBg} px-2 py-0.5 transition-colors whitespace-nowrap`}

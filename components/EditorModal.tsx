@@ -84,13 +84,10 @@ export function EditorModal({
     if (!text.trim()) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      const fallbackVoice = voices.find((v) => v.name.includes("Ichiro")) || voices.find((v) => v.name.includes("Ayumi")) || voices.find((v) => v.name.includes("Haruka"));
-      const selectedVoice =
-        voices.find((v) => v.name.includes(speechVoice)) ||
-        fallbackVoice ||
-        voices.find((v) => v.lang.includes("ja-JP") && !v.name.includes("Keita") && !v.name.includes("Nanami")) ||
-        voices.find((v) => v.lang.includes("ja-JP"));
+    const voices = window.speechSynthesis.getVoices();
+    const selectedVoice =
+      voices.find((v) => v.name.includes(speechVoice)) ||
+      voices.find((v) => v.lang.includes("ja-JP"));
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
@@ -120,14 +117,14 @@ export function EditorModal({
 
     const textarea = e.currentTarget;
     if (textarea.selectionStart !== textarea.selectionEnd) {
-      return; // 選択中なら無視
+      // User is selecting text, do not trigger audio
+      return;
     }
 
     if (isPlaying) {
       window.speechSynthesis.cancel();
       setIsPlaying(false);
     } else {
-      const textarea = e.currentTarget;
       const clickPos = textarea.selectionStart;
       if (typeof clickPos === "number") {
         let textToRead = content.substring(clickPos);
@@ -170,21 +167,15 @@ export function EditorModal({
   const displayTitle = (() => {
     const contentToSearch = content.trim();
     if (!contentToSearch) return "UNTITLED";
-    const lines = contentToSearch.split("\n").map(l => l.trim()).filter(Boolean);
-    if (lines.length === 0) return "UNTITLED";
-    const firstLine = lines[0];
-    const isEmojiOrSymbolOnly = /^[^\w\s\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff\uff66-\uff9f]{1,4}$/u.test(firstLine);
-    if (isEmojiOrSymbolOnly && lines.length > 1) {
-      const secondLine = lines[1];
-      const match = secondLine.match(/^[^。！？.!?]*(?:[。！？]|[.!?](?:\s|$))?/);
-      const secondLineFirstSentence = match ? match[0].trim() : secondLine;
-      return `${firstLine} ${secondLineFirstSentence}`;
-    }
-    const match = firstLine.match(/^[^。！？.!?]*(?:[。！？]|[.!?](?:\s|$))?/);
-    if (match && match[0].trim()) {
+    // 改行、または日本語の句点、感嘆符、疑問符、あるいは英語の末尾記号（.+スペース）で句切る。
+    const match = contentToSearch.match(
+      /^[\s\S]*?(?:[。！？\n]|[.!?](?:\s|$))/,
+    );
+    if (match) {
       return match[0].trim();
+    } else {
+      return contentToSearch.trim();
     }
-    return firstLine;
   })();
 
   const colors = getThemeColors(theme as Theme);
@@ -575,7 +566,7 @@ export function EditorModal({
                 readOnly={!isEditing}
                 onChange={(e) => setContent(e.target.value)}
                 onClick={handleTextareaClick}
-                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} no-scrollbar relative z-10 font-sans ${!isEditing ? "selection:bg-black/10 dark:selection:bg-white/10" : ""}`}
+                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} no-scrollbar relative z-10 font-sans`}
                 style={{
                   textAlign,
                   writingMode: isVertical ? "vertical-rl" : "horizontal-tb",

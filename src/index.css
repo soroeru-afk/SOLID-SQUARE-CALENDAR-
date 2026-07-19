@@ -37,10 +37,13 @@
 .square-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  height: 14px;
-  width: 14px;
+  height: 16px;
+  width: 16px;
   background: var(--slider-thumb);
-  margin-top: -5px;
+  border: 2px solid var(--slider-border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  margin-top: -6px;
 }
 .square-slider::-moz-range-track {
   width: 100%;
@@ -48,11 +51,12 @@
   background: var(--slider-track);
 }
 .square-slider::-moz-range-thumb {
-  height: 14px;
-  width: 14px;
+  height: 16px;
+  width: 16px;
   background: var(--slider-thumb);
-  border: none;
-  border-radius: 0;
+  border: 2px solid var(--slider-border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 /* Custom Thin Scrollbar */
