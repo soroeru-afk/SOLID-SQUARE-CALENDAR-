@@ -126,7 +126,7 @@ export default function App() {
     "ui-sans-serif, system-ui, sans-serif",
   );
   const [editorTextSize, setEditorTextSize] = useState<number>(20);
-  const [editorMaxWidth, setEditorMaxWidth] = useState<number>(760);
+  const [editorMaxWidth, setEditorMaxWidth] = useState<number>(960);
   const [editorLineHeight, setEditorLineHeight] = useState<number>(1.75);
   const [showLogTitlesSquare, setShowLogTitlesSquare] =
     useState<boolean>(false);

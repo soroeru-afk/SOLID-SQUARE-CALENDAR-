@@ -250,7 +250,7 @@ export function EditorModal({
 
         {/* Editor Wrapper (Theme Design) */}
         <div
-          className={`relative w-full h-[95vh] max-w-6xl flex flex-col ${colors.panelBg} ${colors.shadowLg} overflow-hidden rounded-md`}
+          className={`relative w-full h-[95vh] max-w-[2400px] flex flex-col ${colors.panelBg} ${colors.shadowLg} overflow-hidden rounded-md`}
         >
           {/* Editor Header (Stealth UI) */}
           <div
@@ -339,7 +339,7 @@ export function EditorModal({
                     </span>
                     <button
                       onClick={() =>
-                        setEditorMaxWidth(Math.min(1600, editorMaxWidth + 40))
+                        setEditorMaxWidth(Math.min(2400, editorMaxWidth + 40))
                       }
                       className={`${colors.textSubHover} hover:opacity-100 transition-colors px-1 font-mono`}
                     >
@@ -394,21 +394,21 @@ export function EditorModal({
                 <button
                   onClick={() => setTextAlign("left")}
                   title="左寄せ"
-                  className={`${colors.textSubHover} transition-colors ${textAlign === "left" ? colors.textMain : ""}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "left" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
                 >
                   <AlignLeft size={14} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={() => setTextAlign("center")}
                   title="中央寄せ"
-                  className={`${colors.textSubHover} transition-colors ${textAlign === "center" ? colors.textMain : ""}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "center" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
                 >
                   <AlignCenter size={14} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={() => setTextAlign("right")}
                   title="右寄せ"
-                  className={`${colors.textSubHover} transition-colors ${textAlign === "right" ? colors.textMain : ""}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "right" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
                 >
                   <AlignRight size={14} strokeWidth={2.5} />
                 </button>
@@ -417,28 +417,29 @@ export function EditorModal({
               <div className={`w-[1px] h-3 ${colors.borderStrong}`}></div>
 
               {/* Direction Group */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsVertical(false)}
                   title="横書き"
-                  className={`${colors.textSubHover} transition-colors ${!isVertical ? colors.textMain : ""}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${!isVertical ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
                 >
                   HORIZ
                 </button>
                 <button
                   onClick={() => setIsVertical(true)}
                   title="縦書き"
-                  className={`${colors.textSubHover} transition-colors ${isVertical ? colors.textMain : ""}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${isVertical ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
                 >
                   VERT
                 </button>
               </div>
 
               <div className={`w-[1px] h-3 ${colors.borderStrong}`}></div>
+
               <button
                 onClick={() => setIsPaperMode(!isPaperMode)}
                 title="ペーパーモード"
-                className={`${colors.textSubHover} transition-colors ${isPaperMode ? colors.textMain : ""}`}
+                className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${isPaperMode ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
               >
                 PAPER / {isPaperMode ? "ON" : "OFF"}
               </button>
