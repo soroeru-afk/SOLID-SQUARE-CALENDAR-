@@ -289,19 +289,20 @@ export function EditorModal({
                 {displayTitle}
               </div>
               <div
-                className={`text-[10px] ${colors.textSub} mt-2 opacity-40 truncate flex items-center gap-2`}
+                className={`text-[10px] ${colors.textSub} mt-2 opacity-60 flex items-center gap-3 w-full`}
               >
-                <span>{log.name}</span>
-                <span>
+                <span className="truncate">{log.name}</span>
+                <span className="flex-shrink-0 font-bold tracking-wider">
                   {(() => {
-                    if (!log.dateStr || log.dateStr.length !== 8) return "";
-                    const year = log.dateStr.substring(0, 4);
-                    const month = parseInt(log.dateStr.substring(4, 6), 10);
-                    const day = parseInt(log.dateStr.substring(6, 8), 10);
+                    const dStr = log.dateStr;
+                    if (!dStr || dStr.length !== 8) return "";
+                    const year = dStr.substring(0, 4);
+                    const month = parseInt(dStr.substring(4, 6), 10);
+                    const day = parseInt(dStr.substring(6, 8), 10);
                     if (theme === "JAPAN") {
                       return `${year}年${month}月${day}日`;
                     }
-                    return `${year} / ${log.dateStr.substring(4, 6)} / ${log.dateStr.substring(6, 8)}`;
+                    return `${year} / ${dStr.substring(4, 6)} / ${dStr.substring(6, 8)}`;
                   })()}
                 </span>
               </div>
