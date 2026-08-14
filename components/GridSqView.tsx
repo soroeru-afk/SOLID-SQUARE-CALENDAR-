@@ -173,10 +173,15 @@ export function GridSqView({
                     +
                   </button>
                   <div 
-                    className={`font-bold text-right leading-none ${dateNumColor}`}
+                    className={`font-bold text-right leading-none ${
+                      ["NAVY", "ROSE", "MONOTONE"].includes(theme as string) ? 'text-white' : dateNumColor
+                    }`}
                     style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
                   >
-                    {dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} {dateStrObj.getDate()}
+                    {theme === "JAPAN" 
+                      ? `${dateStrObj.getMonth() + 1}月${dateStrObj.getDate()}日` 
+                      : `${dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} ${dateStrObj.getDate()}`
+                    }
                   </div>
                 </div>
 
