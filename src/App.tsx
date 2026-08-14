@@ -254,6 +254,35 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let metaColor = "#000000";
+    switch (theme) {
+      case "MONOTONE":
+        metaColor = "#000000";
+        break;
+      case "ROSE":
+        metaColor = "#080202";
+        break;
+      case "JAPAN":
+        metaColor = "#ffffff";
+        break;
+      case "LIGHT":
+        metaColor = "#ffffff";
+        break;
+      case "NAVY":
+        metaColor = "#060A11";
+        break;
+    }
+    
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', metaColor);
+  }, [theme]);
+
+  useEffect(() => {
     loadFontDynamically(textFont);
     loadFontDynamically(dateFont);
     loadFontDynamically(systemFont);
