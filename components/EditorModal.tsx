@@ -289,10 +289,9 @@ export function EditorModal({
                 {displayTitle}
               </div>
               <div
-                className={`text-[10px] ${colors.textSub} mt-2 opacity-60 flex items-center gap-3 w-full`}
+                className={`mt-2 flex items-baseline gap-3 w-full`}
               >
-                <span className="truncate">{log.name}</span>
-                <span className="flex-shrink-0 font-bold tracking-wider">
+                <span className={`flex-shrink-0 font-bold tracking-wider text-sm ${colors.textMain}`}>
                   {(() => {
                     const dStr = log.dateStr;
                     if (!dStr || dStr.length !== 8) return "";
@@ -305,6 +304,7 @@ export function EditorModal({
                     return `${year} / ${dStr.substring(4, 6)} / ${dStr.substring(6, 8)}`;
                   })()}
                 </span>
+                <span className={`text-[10px] ${colors.textSub} opacity-40 truncate`}>{log.name}</span>
               </div>
             </div>
 
