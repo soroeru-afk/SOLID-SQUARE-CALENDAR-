@@ -3,6 +3,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { LogFile } from "@/lib/fs";
 import { motion, AnimatePresence } from "motion/react";
 import { Theme, getThemeColors } from "@/lib/theme";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   AlignLeft,
   AlignCenter,
@@ -33,7 +35,7 @@ export function EditorModal({
   speechRate = 2.0,
   speechVolume = 1.0,
   speechPitch = 1.0,
-          onNavigate,
+  onNavigate,
   hasPrev,
   hasNext,
 }: any) {
@@ -60,13 +62,20 @@ export function EditorModal({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEditing, setIsEditing] = useState(log.isNew || false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<number | null>(null);
 
+  const getScrollEl = useCallback(() => {
+    return isEditing ? textareaRef.current : previewRef.current;
+  }, [isEditing]);
+
   const startScroll = (direction: -1 | 1) => {
-    if (!textareaRef.current) return;
+    const el = getScrollEl();
+    if (!el) return;
     const scrollStep = () => {
-      if (textareaRef.current) {
-        textareaRef.current.scrollBy({ left: direction * 10 });
+      const currentEl = getScrollEl();
+      if (currentEl) {
+        currentEl.scrollBy({ left: direction * 10 });
       }
       scrollRef.current = requestAnimationFrame(scrollStep);
     };
@@ -81,8 +90,8 @@ export function EditorModal({
   };
 
   const scrollToBeginning = useCallback(() => {
-    if (!textareaRef.current) return;
-    const el = textareaRef.current;
+    const el = getScrollEl();
+    if (!el) return;
     if (isVertical) {
       // 縦書き (vertical-rl) の先頭は文章の書き始め (右端)
       el.scrollLeft = 0;
@@ -92,11 +101,11 @@ export function EditorModal({
       el.scrollTop = 0;
       el.scrollTo({ top: 0, behavior: "instant" });
     }
-  }, [isVertical]);
+  }, [isVertical, getScrollEl]);
 
   const scrollToEnd = useCallback(() => {
-    if (!textareaRef.current) return;
-    const el = textareaRef.current;
+    const el = getScrollEl();
+    if (!el) return;
     if (isVertical) {
       // 縦書き (vertical-rl) の末尾は文章の終わり (左端)
       // 現代ブラウザ (Chromium, Safari, Firefox) は -scrollWidth
@@ -107,7 +116,7 @@ export function EditorModal({
       el.scrollTop = el.scrollHeight;
       el.scrollTo({ top: el.scrollHeight, behavior: "instant" });
     }
-  }, [isVertical]);
+  }, [isVertical, getScrollEl]);
 
   // Speech Synthesis
   const speakText = (text: string) => {
@@ -183,26 +192,47 @@ export function EditorModal({
     };
   }, []);
 
-  // Handle vertical scroll with mouse wheel
+  const handlePreviewClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isEditing) return;
+
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 0) {
+      // ユーザーがテキスト選択中なら音声再生はトリガーしない
+      return;
+    }
+
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else {
+      const target = e.target as HTMLElement;
+      const clickedText = target.innerText || content;
+      if (clickedText.trim()) {
+        speakText(clickedText);
+      }
+    }
+  };
+
+  // Handle vertical scroll with mouse wheel (supports both textarea and markdown preview)
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+    const el = isEditing ? textareaRef.current : previewRef.current;
+    if (!el) return;
 
     const handleWheel = (e: WheelEvent) => {
       if (isVertical && e.deltaY !== 0) {
         e.preventDefault();
         // Since vertical-rl flow relies on horizontal scrolling, map deltaY to scrollLeft.
         // Scroll amount is adjusted for typical mouse wheel feel (reversed per user request)
-        textarea.scrollLeft -= e.deltaY;
+        el.scrollLeft -= e.deltaY;
       }
     };
 
-    textarea.addEventListener("wheel", handleWheel, { passive: false });
+    el.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
-      textarea.removeEventListener("wheel", handleWheel);
+      el.removeEventListener("wheel", handleWheel);
     };
-  }, [isVertical]);
+  }, [isVertical, isEditing]);
 
   // タイトルを動的に生成
   const displayTitle = (() => {
@@ -224,6 +254,212 @@ export function EditorModal({
   const panelBgClass = isPaperActive ? "bg-[#FAF6F0]" : colors.panelBg;
   const textMainClass = isPaperActive ? "text-[#181818]" : colors.textMain;
   const textDimClass = isPaperActive ? "text-black/30" : colors.textDim;
+
+  const tableBorderColor = isPaperActive
+    ? "border-[#c8c0b2]"
+    : colors.borderStrong;
+
+  // テーブル内フォントサイズ（本文文字サイズに連動して約88%に調整、極小化を防ぐため最低12px）
+  const tableFontSize = Math.max(12, Math.round(textSize * 0.88));
+  // テーブル内行間（本文の行間に心地よく追従しつつ、枠線内で詰まりすぎず間延びもしないバランス）
+  const tableLineHeight = Math.max(1.2, Math.min(1.8, Number(editorLineHeight) * 0.88)).toFixed(2);
+  const bodyLineHeight = Number(editorLineHeight);
+
+  const markdownComponents = {
+    table: ({ node, ...props }: any) => (
+      <div
+        className={
+          isVertical
+            ? "max-h-full inline-block mx-4 my-auto overflow-y-auto overflow-x-visible thin-scrollbar align-top"
+            : "w-full my-4 overflow-x-auto thin-scrollbar"
+        }
+        style={{ writingMode: isVertical ? "vertical-rl" : "horizontal-tb" }}
+      >
+        <table
+          className={`border-collapse border ${tableBorderColor} ${
+            isVertical ? "max-h-full" : "w-full my-1"
+          }`}
+          style={{
+            writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
+            fontSize: `${tableFontSize}px`,
+            lineHeight: tableLineHeight,
+          }}
+          {...props}
+        />
+      </div>
+    ),
+    thead: ({ node, ...props }: any) => (
+      <thead
+        className={`${
+          isVertical ? "border-l-2" : "border-b-2"
+        } ${tableBorderColor} ${
+          isPaperActive ? "bg-black/5" : colors.isDark ? "bg-white/5" : "bg-slate-100"
+        } font-bold`}
+        {...props}
+      />
+    ),
+    tbody: ({ node, ...props }: any) => (
+      <tbody className="divide-y divide-inherit" {...props} />
+    ),
+    tr: ({ node, ...props }: any) => (
+      <tr
+        className={`${
+          isVertical ? "border-l" : "border-b"
+        } ${tableBorderColor} transition-colors hover:bg-black/5 dark:hover:bg-white/5`}
+        {...props}
+      />
+    ),
+    th: ({ node, ...props }: any) => (
+      <th
+        className={`p-2.5 sm:p-3 font-bold border ${tableBorderColor} align-top tracking-wider whitespace-normal`}
+        style={{
+          writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
+          fontSize: `${tableFontSize}px`,
+          lineHeight: tableLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    td: ({ node, ...props }: any) => (
+      <td
+        className={`p-2.5 sm:p-3 border ${tableBorderColor} align-top break-words whitespace-normal`}
+        style={{
+          writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
+          fontSize: `${tableFontSize}px`,
+          lineHeight: tableLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    h1: ({ node, ...props }: any) => (
+      <h1
+        className={`font-bold tracking-wide ${
+          isVertical
+            ? "mx-4 my-0 pr-1.5 border-r border-current/20"
+            : "my-4 mx-0 pb-1.5 border-b border-current/20"
+        }`}
+        style={{
+          fontSize: `${Math.round(textSize * 1.35)}px`,
+          lineHeight: Math.max(1.2, bodyLineHeight * 0.9),
+        }}
+        {...props}
+      />
+    ),
+    h2: ({ node, ...props }: any) => (
+      <h2
+        className={`font-bold tracking-wide ${
+          isVertical
+            ? "mx-3.5 my-0 pr-1 border-r border-current/15"
+            : "my-3 mx-0 pb-1 border-b border-current/15"
+        }`}
+        style={{
+          fontSize: `${Math.round(textSize * 1.2)}px`,
+          lineHeight: Math.max(1.2, bodyLineHeight * 0.9),
+        }}
+        {...props}
+      />
+    ),
+    h3: ({ node, ...props }: any) => (
+      <h3
+        className={`font-bold tracking-wide ${
+          isVertical ? "mx-3 my-0" : "my-2 mx-0"
+        }`}
+        style={{
+          fontSize: `${Math.round(textSize * 1.08)}px`,
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    h4: ({ node, ...props }: any) => (
+      <h4
+        className={`font-bold ${
+          isVertical ? "mx-2 my-0" : "my-2 mx-0"
+        }`}
+        style={{
+          fontSize: `${textSize}px`,
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    p: ({ node, ...props }: any) => (
+      <p
+        className={`whitespace-pre-wrap break-words ${
+          isVertical ? "mx-2.5 my-0" : "my-2.5 mx-0"
+        }`}
+        style={{
+          fontSize: `${textSize}px`,
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    ul: ({ node, ...props }: any) => (
+      <ul
+        className={`list-disc list-outside space-y-1 ${
+          isVertical ? "mx-3 my-0 pt-6" : "my-3 mx-0 pl-6"
+        }`}
+        style={{
+          fontSize: `${textSize}px`,
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    ol: ({ node, ...props }: any) => (
+      <ol
+        className={`list-decimal list-outside space-y-1 ${
+          isVertical ? "mx-3 my-0 pt-6" : "my-3 mx-0 pl-6"
+        }`}
+        style={{
+          fontSize: `${textSize}px`,
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    li: ({ node, ...props }: any) => (
+      <li
+        style={{
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    strong: ({ node, ...props }: any) => (
+      <strong className="font-bold opacity-100" {...props} />
+    ),
+    blockquote: ({ node, ...props }: any) => (
+      <blockquote
+        className={`opacity-80 italic ${
+          isVertical
+            ? `border-r-4 ${tableBorderColor} pr-3 mx-3 my-0`
+            : `border-l-4 ${tableBorderColor} pl-3 py-1 my-3 mx-0`
+        }`}
+        style={{
+          lineHeight: bodyLineHeight,
+        }}
+        {...props}
+      />
+    ),
+    code: ({ node, inline, ...props }: any) => (
+      <code
+        className="bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[0.9em]"
+        {...props}
+      />
+    ),
+    hr: ({ node, ...props }: any) => (
+      <hr
+        className={`${
+          isVertical
+            ? `mx-6 border-r ${tableBorderColor} inline-block h-full align-top`
+            : `my-6 border-t ${tableBorderColor}`
+        }`}
+        {...props}
+      />
+    ),
+  };
 
   // Focus on mount
   useEffect(() => {
@@ -525,15 +761,16 @@ export function EditorModal({
               {/* Edit Toggle */}
               <button
                 onClick={() => {
-                  setIsEditing(!isEditing);
-                  if (!isEditing) {
+                  const nextState = !isEditing;
+                  setIsEditing(nextState);
+                  if (nextState) {
                     setTimeout(() => textareaRef.current?.focus(), 0);
                   }
                 }}
-                title={isEditing ? "編集モードを終了" : "編集モードにする"}
+                title={isEditing ? "プレビュー表示に戻る" : "テキスト編集モードにする"}
                 className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${isEditing ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
               >
-                EDIT
+                {isEditing ? "VIEW" : "EDIT"}
               </button>
 
               {/* Save Button */}
@@ -635,7 +872,7 @@ export function EditorModal({
               className={`w-full h-full relative transition-all`}
               style={{ maxWidth: `${editorMaxWidth}px` }}
             >
-              {content === "" && (
+              {content === "" && isEditing && (
                 <div
                   className={`absolute top-0 left-0 ${textDimClass} font-bold pointer-events-none whitespace-pre-wrap select-none w-full`}
                   style={{
@@ -648,22 +885,51 @@ export function EditorModal({
                   Type your text here...
                 </div>
               )}
-              <textarea
-                ref={textareaRef}
-                value={content}
-                readOnly={!isEditing}
-                onChange={(e) => setContent(e.target.value)}
-                onClick={handleTextareaClick}
-                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} thin-scrollbar relative z-10 font-sans`}
-                style={{
-                  textAlign,
-                  writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
-                  fontSize: `${textSize}px`,
-                  fontFamily: textFont,
-                  lineHeight: Number(editorLineHeight),
-                }}
-                spellCheck={false}
-              />
+              {isEditing ? (
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} thin-scrollbar relative z-10 font-sans`}
+                  style={{
+                    textAlign,
+                    writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
+                    fontSize: `${textSize}px`,
+                    fontFamily: textFont,
+                    lineHeight: Number(editorLineHeight),
+                  }}
+                  spellCheck={false}
+                />
+              ) : (
+                <div
+                  ref={previewRef}
+                  onDoubleClick={() => {
+                    setIsEditing(true);
+                    setTimeout(() => textareaRef.current?.focus(), 0);
+                  }}
+                  onClick={handlePreviewClick}
+                  className={`w-full h-full overflow-auto outline-none ${textMainClass} thin-scrollbar relative z-10 font-sans select-text`}
+                  style={{
+                    textAlign,
+                    writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
+                    fontSize: `${textSize}px`,
+                    fontFamily: textFont,
+                    lineHeight: Number(editorLineHeight),
+                  }}
+                  title="ダブルクリックで編集"
+                >
+                  {content.trim() === "" ? (
+                    <div className={`${textDimClass} italic select-none`}>No content</div>
+                  ) : (
+                    <Markdown
+                      remarkPlugins={[remarkGfm]}
+                      components={markdownComponents}
+                    >
+                      {content}
+                    </Markdown>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -671,7 +937,7 @@ export function EditorModal({
           <div
             className={`flex-none p-6 flex flex-col items-center justify-center text-[9px] ${colors.textDim} tracking-widest uppercase ${colors.panelBg}`}
           >
-            <div>{content.length} CHARS</div>
+            <div>{content.length} CHARS • {isEditing ? "EDITING MODE" : "PREVIEW MODE (DOUBLE CLICK TO EDIT)"}</div>
           </div>
         </div>
       </motion.div>
