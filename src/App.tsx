@@ -251,6 +251,14 @@ export default function App() {
     };
 
     initDirHandle();
+
+    // Pre-load speech synthesis voices
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
   }, []);
 
   useEffect(() => {

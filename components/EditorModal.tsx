@@ -10,6 +10,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Play,
   Square,
 } from "lucide-react";
@@ -77,6 +79,35 @@ export function EditorModal({
       scrollRef.current = null;
     }
   };
+
+  const scrollToBeginning = useCallback(() => {
+    if (!textareaRef.current) return;
+    const el = textareaRef.current;
+    if (isVertical) {
+      // 縦書き (vertical-rl) の先頭は文章の書き始め (右端)
+      el.scrollLeft = 0;
+      el.scrollTo({ left: 0, behavior: "instant" });
+    } else {
+      // 横書きの先頭 (上端)
+      el.scrollTop = 0;
+      el.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [isVertical]);
+
+  const scrollToEnd = useCallback(() => {
+    if (!textareaRef.current) return;
+    const el = textareaRef.current;
+    if (isVertical) {
+      // 縦書き (vertical-rl) の末尾は文章の終わり (左端)
+      // 現代ブラウザ (Chromium, Safari, Firefox) は -scrollWidth
+      el.scrollLeft = -el.scrollWidth;
+      el.scrollTo({ left: -el.scrollWidth, behavior: "instant" });
+    } else {
+      // 横書きの末尾 (下端)
+      el.scrollTop = el.scrollHeight;
+      el.scrollTo({ top: el.scrollHeight, behavior: "instant" });
+    }
+  }, [isVertical]);
 
   // Speech Synthesis
   const speakText = (text: string) => {
@@ -224,7 +255,7 @@ export function EditorModal({
         onClose();
       }
       
-      // j and k navigation when not editing text
+      // j, k and Home, End navigation when not editing text
       if (!isEditing && e.target instanceof HTMLElement) {
          const tagName = e.target.tagName.toLowerCase();
          if (tagName !== "textarea" && tagName !== "input") {
@@ -236,12 +267,20 @@ export function EditorModal({
                e.preventDefault();
                onNavigate('PREV');
             }
+            if (e.key === "Home") {
+               e.preventDefault();
+               scrollToBeginning();
+            }
+            if (e.key === "End") {
+               e.preventDefault();
+               scrollToEnd();
+            }
          }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [content, log, handleSave, onClose, isEditing, hasPrev, hasNext, onNavigate]);
+  }, [content, log, handleSave, onClose, isEditing, hasPrev, hasNext, onNavigate, scrollToBeginning, scrollToEnd]);
 
   return (
     <AnimatePresence>
@@ -540,30 +579,55 @@ export function EditorModal({
           >
             {isVertical && (
               <>
-                <button
-                  onMouseDown={() => startScroll(-1)}
-                  onMouseUp={stopScroll}
-                  onMouseLeave={stopScroll}
-                  onTouchStart={() => startScroll(-1)}
-                  onTouchEnd={stopScroll}
-                  className={`absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center`}
+                {/* Left Controls: End & Scroll Left */}
+                <div
+                  className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ zIndex: 20 }}
-                  title="左へスクロール"
                 >
-                  <ChevronLeft size={32} className={textMainClass} />
-                </button>
-                <button
-                  onMouseDown={() => startScroll(1)}
-                  onMouseUp={stopScroll}
-                  onMouseLeave={stopScroll}
-                  onTouchStart={() => startScroll(1)}
-                  onTouchEnd={stopScroll}
-                  className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center`}
+                  <button
+                    onClick={scrollToEnd}
+                    className={`p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/15 dark:hover:bg-white/15 transition-colors flex items-center justify-center cursor-pointer shadow-sm`}
+                    title="一番最後へ移動 (末尾)"
+                  >
+                    <ChevronsLeft size={24} className={textMainClass} />
+                  </button>
+                  <button
+                    onMouseDown={() => startScroll(-1)}
+                    onMouseUp={stopScroll}
+                    onMouseLeave={stopScroll}
+                    onTouchStart={() => startScroll(-1)}
+                    onTouchEnd={stopScroll}
+                    className={`p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer shadow-sm`}
+                    title="左へスクロール (長押し)"
+                  >
+                    <ChevronLeft size={28} className={textMainClass} />
+                  </button>
+                </div>
+
+                {/* Right Controls: Start & Scroll Right */}
+                <div
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ zIndex: 20 }}
-                  title="右へスクロール"
                 >
-                  <ChevronRight size={32} className={textMainClass} />
-                </button>
+                  <button
+                    onClick={scrollToBeginning}
+                    className={`p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/15 dark:hover:bg-white/15 transition-colors flex items-center justify-center cursor-pointer shadow-sm`}
+                    title="一番前へ移動 (先頭)"
+                  >
+                    <ChevronsRight size={24} className={textMainClass} />
+                  </button>
+                  <button
+                    onMouseDown={() => startScroll(1)}
+                    onMouseUp={stopScroll}
+                    onMouseLeave={stopScroll}
+                    onTouchStart={() => startScroll(1)}
+                    onTouchEnd={stopScroll}
+                    className={`p-2 rounded-full ${colors.borderStrong} border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer shadow-sm`}
+                    title="右へスクロール (長押し)"
+                  >
+                    <ChevronRight size={28} className={textMainClass} />
+                  </button>
+                </div>
               </>
             )}
 
@@ -590,7 +654,7 @@ export function EditorModal({
                 readOnly={!isEditing}
                 onChange={(e) => setContent(e.target.value)}
                 onClick={handleTextareaClick}
-                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} no-scrollbar relative z-10 font-sans`}
+                className={`w-full h-full bg-transparent resize-none outline-none ${textMainClass} thin-scrollbar relative z-10 font-sans`}
                 style={{
                   textAlign,
                   writingMode: isVertical ? "vertical-rl" : "horizontal-tb",
