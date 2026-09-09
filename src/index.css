@@ -106,3 +106,44 @@
   visibility: visible;
 }
 
+/* Diagonal stripe pattern for Today */
+.today-stripe-light {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.04) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.today-stripe-japan {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(15, 23, 42, 0.045),
+    rgba(15, 23, 42, 0.045) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.today-stripe-dark {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.05) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.today-stripe-rose {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 100, 100, 0.06),
+    rgba(255, 100, 100, 0.06) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+

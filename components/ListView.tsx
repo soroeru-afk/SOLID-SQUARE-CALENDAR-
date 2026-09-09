@@ -49,20 +49,40 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
            if (theme === "JAPAN") {
              holidayName = JapaneseHolidays.isHoliday(dateObj);
              if (dayOfWeek === 0 || holidayName) {
-               dateNumColor = "text-red-600";
-               dNameColor = "text-red-600";
+               dateNumColor = "text-[#6E0005]";
+               dNameColor = "text-[#6E0005]";
              } else if (dayOfWeek === 6) {
-               dateNumColor = "text-blue-600";
-               dNameColor = "text-blue-600";
+               dateNumColor = "text-[#082666]";
+               dNameColor = "text-[#082666]";
              } else {
                dateNumColor = colors.textMain;
              }
            }
 
            return (
-             <div key={dateStr} className={`w-full flex border-b ${colors.border} group`}>
+             <div 
+               key={dateStr} 
+               className={`relative w-full flex border-b ${colors.border} group transition-colors ${
+                 isToday ? `ring-1 ring-inset ${colors.todayRing}` : ""
+               }`}
+             >
+               {/* TODAY STRIPED BACKGROUND */}
+               {isToday && (
+                 <div
+                   className={`absolute inset-0 pointer-events-none z-0 ${colors.todayStripe}`}
+                   aria-hidden="true"
+                 />
+               )}
+
                {/* Left: Date */}
-               <div className={`w-32 flex-none flex flex-col items-center justify-center py-6 border-r ${colors.border}`}>
+               <div className={`relative z-10 w-32 flex-none flex flex-col items-center justify-center py-6 border-r ${colors.border}`}>
+                 {isToday && (
+                   <div className="mb-1.5">
+                     <span className={`px-1.5 py-0.5 text-[9px] font-bold font-sans tracking-wider leading-none select-none rounded-[2px] shadow-xs ${colors.todayBadge}`}>
+                       {theme === "JAPAN" ? "今日" : "TODAY"}
+                     </span>
+                   </div>
+                 )}
                  <div className="flex flex-col items-center relative pl-4">
                    <div 
                      className={`font-bold leading-none ${dateNumColor}`}
@@ -73,7 +93,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                    <div className={`text-xs ${dNameColor} font-bold mt-1 text-center`}>
                      {dName}
                      {holidayName && (
-                        <div className="text-[8px] font-normal opacity-80 mt-1 max-w-[80px] leading-tight break-words">
+                        <div className="text-[11px] font-bold opacity-90 mt-1 max-w-[96px] leading-snug break-words">
                           {holidayName}
                         </div>
                      )}
@@ -88,7 +108,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                </div>
 
                {/* Right: Logs */}
-               <div className="flex-1 flex flex-col justify-center px-6 py-4">
+               <div className="relative z-10 flex-1 flex flex-col justify-center px-6 py-4">
                  {dayLogs.map((log: LogFile) => (
                    <div 
                      key={log.name} 

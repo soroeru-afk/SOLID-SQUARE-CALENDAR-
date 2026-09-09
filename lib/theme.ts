@@ -7,6 +7,7 @@ export function getThemeColors(theme: Theme) {
     return {
       isDark: true,
       bg: "bg-zinc-950",
+      bgHover: "hover:bg-zinc-800",
       panelBg: "bg-black", // Header and Sidebar look
       itemBg: "bg-zinc-900",
       itemBgHover: "hover:bg-zinc-800",
@@ -24,6 +25,10 @@ export function getThemeColors(theme: Theme) {
       activeBg: "bg-zinc-800",
       activeText: "text-white",
       ring: "ring-zinc-700",
+      todayRing: "ring-zinc-600",
+      todayBorder: "border-zinc-600",
+      todayBadge: "bg-zinc-200 text-zinc-950",
+      todayStripe: "today-stripe-dark",
       shadow: "shadow-none",
       shadowLg: "shadow-2xl shadow-black",
     };
@@ -33,6 +38,7 @@ export function getThemeColors(theme: Theme) {
     return {
       isDark: true,
       bg: "bg-[#0f0404]",
+      bgHover: "hover:bg-[#331111]",
       panelBg: "bg-[#080202]", // Header and Sidebar look
       itemBg: "bg-[#1f0909]",
       itemBgHover: "hover:bg-[#331111]",
@@ -50,6 +56,10 @@ export function getThemeColors(theme: Theme) {
       activeBg: "bg-[#331111]",
       activeText: "text-[#fdf2f2]",
       ring: "ring-[#4d1a1a]",
+      todayRing: "ring-[#662222]",
+      todayBorder: "border-[#662222]",
+      todayBadge: "bg-[#c26666] text-white",
+      todayStripe: "today-stripe-rose",
       shadow: "shadow-none",
       shadowLg: "shadow-2xl shadow-black",
     };
@@ -59,6 +69,7 @@ export function getThemeColors(theme: Theme) {
     return {
       isDark: false,
       bg: "bg-[#f8f9fa]",
+      bgHover: "hover:bg-slate-100",
       panelBg: "bg-white",
       itemBg: "bg-white",
       itemBgHover: "hover:bg-slate-50",
@@ -76,6 +87,10 @@ export function getThemeColors(theme: Theme) {
       activeBg: "bg-slate-200",
       activeText: "text-slate-900",
       ring: "ring-slate-400",
+      todayRing: "ring-slate-400",
+      todayBorder: "border-slate-400",
+      todayBadge: "bg-slate-800 text-white",
+      todayStripe: "today-stripe-japan",
       shadow: "shadow-none",
       shadowLg: "shadow-xl shadow-slate-200/50",
     };
@@ -85,6 +100,7 @@ export function getThemeColors(theme: Theme) {
   return {
     isDark,
     bg: isDark ? "bg-[#0B121C]" : "bg-slate-50",
+    bgHover: isDark ? "hover:bg-[#1A2A40]" : "hover:bg-slate-100",
     panelBg: isDark ? "bg-[#060A11]" : "bg-white", // Sidebar etc
     itemBg: isDark ? "bg-[#0E1724]" : "bg-white", // Cards
     itemBgHover: isDark ? "hover:bg-[#131F33]" : "hover:bg-slate-50",
@@ -102,6 +118,10 @@ export function getThemeColors(theme: Theme) {
     activeBg: isDark ? "bg-[#20334C]" : "bg-slate-200",
     activeText: isDark ? "text-[#FFFFFF]" : "text-slate-900",
     ring: isDark ? "ring-[#2B405C]" : "ring-slate-400",
+    todayRing: isDark ? "ring-[#385273]" : "ring-slate-400",
+    todayBorder: isDark ? "border-[#385273]" : "border-slate-400",
+    todayBadge: isDark ? "bg-[#2B405C] text-[#CFE1F0]" : "bg-slate-800 text-white",
+    todayStripe: isDark ? "today-stripe-dark" : "today-stripe-light",
     shadow: isDark ? "shadow-none" : "shadow-sm",
     shadowLg: isDark
       ? "shadow-2xl shadow-black/80"

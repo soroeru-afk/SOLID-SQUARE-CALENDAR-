@@ -121,9 +121,9 @@ export default function App() {
   const [textFont, setTextFont] = useState<string>(
     "ui-sans-serif, system-ui, sans-serif",
   );
-  const [dateSize, setDateSize] = useState<number>(84);
+  const [dateSize, setDateSize] = useState<number>(54);
   const [dateFont, setDateFont] = useState<string>(
-    "ui-sans-serif, system-ui, sans-serif",
+    '"Arial Black", Gadget, sans-serif',
   );
   const [editorTextSize, setEditorTextSize] = useState<number>(20);
   const [editorMaxWidth, setEditorMaxWidth] = useState<number>(960);
@@ -197,8 +197,16 @@ export default function App() {
         if (parsed.previewHeight) setPreviewHeight(parsed.previewHeight);
         if (parsed.previewOpacity) setPreviewOpacity(parsed.previewOpacity);
         if (parsed.textFont) setTextFont(parsed.textFont);
-        if (parsed.dateSize) setDateSize(parsed.dateSize);
-        if (parsed.dateFont) setDateFont(parsed.dateFont);
+        if (parsed.dateSize) {
+          setDateSize(parsed.dateSize === 84 ? 54 : parsed.dateSize);
+        }
+        if (parsed.dateFont) {
+          setDateFont(
+            parsed.dateFont === "ui-sans-serif, system-ui, sans-serif"
+              ? '"Arial Black", Gadget, sans-serif'
+              : parsed.dateFont,
+          );
+        }
         if (parsed.systemFont) setSystemFont(parsed.systemFont);
         if (parsed.editorTextSize) setEditorTextSize(parsed.editorTextSize);
         if (parsed.editorMaxWidth) setEditorMaxWidth(parsed.editorMaxWidth);
@@ -937,7 +945,7 @@ export default function App() {
                     type="range"
                     min="24"
                     max="120"
-                    step="4"
+                    step="2"
                     value={dateSize}
                     onChange={(e) => setDateSize(parseInt(e.target.value))}
                     className="square-slider"

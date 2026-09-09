@@ -45,8 +45,8 @@ export function GridSqView({
 
   const getHeaderColor = (idx: number) => {
     if (theme === "JAPAN") {
-      if (idx === 0) return "text-red-600";
-      if (idx === 6) return "text-blue-600";
+      if (idx === 0) return "text-[#6E0005]";
+      if (idx === 6) return "text-[#082666]";
     }
     return colors.textMain;
   };
@@ -100,9 +100,9 @@ export function GridSqView({
           if (theme === "JAPAN") {
             holidayName = JapaneseHolidays.isHoliday(dateStrObj);
             if (dayOfWeek === 0 || holidayName) {
-              dateNumColor = "text-red-600";
+              dateNumColor = "text-[#6E0005]";
             } else if (dayOfWeek === 6) {
-              dateNumColor = "text-blue-600";
+              dateNumColor = "text-[#082666]";
             }
           }
 
@@ -111,11 +111,28 @@ export function GridSqView({
               key={dateStr + idx}
               className={`relative border flex flex-col group transition-all duration-300 hover:z-50 hover:opacity-100
                 ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} opacity-50`} 
-                ${isToday ? `ring-2 ring-inset ${colors.ring}` : ""}
+                ${isToday ? `ring-1 ring-inset ${colors.todayRing}` : ""}
               `}
             >
+              {/* TODAY STRIPED BACKGROUND */}
+              {isToday && (
+                <div
+                  className={`absolute inset-0 pointer-events-none z-0 ${colors.todayStripe}`}
+                  aria-hidden="true"
+                />
+              )}
+
               {/* DEFAULT VIEW (CLIPPED) */}
-              <div className="absolute inset-0 p-1 flex flex-col overflow-hidden pointer-events-none group-hover:opacity-0 transition-opacity">
+              <div className="absolute inset-0 p-1 flex flex-col overflow-hidden pointer-events-none group-hover:opacity-0 transition-opacity z-10">
+                {/* TODAY BADGE */}
+                {isToday && (
+                  <div className="absolute top-1 left-1.5 z-20">
+                    <span className={`px-1.5 py-0.5 text-[9px] font-bold font-sans tracking-wider leading-none select-none rounded-[2px] shadow-xs ${colors.todayBadge}`}>
+                      {theme === "JAPAN" ? "今日" : "TODAY"}
+                    </span>
+                  </div>
+                )}
+
                 {/* DATE NUMBER */}
                 <div
                   className={`absolute top-0 right-1 font-bold select-none leading-none pt-1 flex flex-col items-end ${dateNumColor}`}
@@ -126,7 +143,7 @@ export function GridSqView({
                 </div>
                 
                 {holidayName && (
-                  <div className={`absolute bottom-1 right-1 text-[8px] font-sans font-bold opacity-80 whitespace-nowrap z-10 ${dateNumColor}`}>
+                  <div className={`absolute bottom-1 right-1 text-[11px] font-sans font-bold leading-none tracking-tight z-10 max-w-[95%] truncate text-right ${dateNumColor}`}>
                     {holidayName}
                   </div>
                 )}
@@ -157,7 +174,7 @@ export function GridSqView({
 
               {/* OVERLAY EXPANDED VIEW (VISIBLE ON HOVER) */}
               <div
-                className={`absolute ${isBottom ? 'bottom-0' : 'top-0'} ${isRightSide ? 'right-0' : 'left-0'} min-h-full ${colors.itemBg} border ${colors.borderStrong} ${colors.shadowLg} flex flex-col pointer-events-auto overlay-preview z-50 overflow-y-auto no-scrollbar`}
+                className={`absolute ${isBottom ? 'bottom-0' : 'top-0'} ${isRightSide ? 'right-0' : 'left-0'} min-h-full ${colors.itemBg} border ${isToday ? colors.todayBorder : colors.borderStrong} ${colors.shadowLg} flex flex-col pointer-events-auto overlay-preview z-50 overflow-y-auto no-scrollbar`}
                 style={{
                   width: `${previewWidth}%`,
                   maxHeight: `${previewHeight}px`,
@@ -173,11 +190,16 @@ export function GridSqView({
                     +
                   </button>
                   <div 
-                    className={`font-bold text-right leading-none ${
+                    className={`font-bold text-right leading-none flex items-center gap-1.5 ${
                       ["NAVY", "ROSE", "MONOTONE"].includes(theme as string) ? 'text-white' : dateNumColor
                     }`}
                     style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
                   >
+                    {isToday && (
+                      <span className={`px-1 py-0.5 text-[8px] font-sans font-bold leading-none rounded-[2px] ${colors.todayBadge}`}>
+                        {theme === "JAPAN" ? "今日" : "TODAY"}
+                      </span>
+                    )}
                     {theme === "JAPAN" 
                       ? `${dateStrObj.getMonth() + 1}月${dateStrObj.getDate()}日` 
                       : `${dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} ${dateStrObj.getDate()}`
