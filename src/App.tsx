@@ -139,6 +139,10 @@ export default function App() {
   const [systemFont, setSystemFont] = useState<string>(
     "'Space Mono', 'Rajdhani', ui-monospace, SFMono-Regular, monospace",
   );
+  const [showMonthWatermark, setShowMonthWatermark] = useState<boolean>(true);
+  const [monthWatermarkSize, setMonthWatermarkSize] = useState<number>(180);
+  const [monthWatermarkOpacity, setMonthWatermarkOpacity] = useState<number>(10);
+  const [monthWatermarkOffsetY, setMonthWatermarkOffsetY] = useState<number>(-15);
 
   // Audio Settings
   const [speechVoice, setSpeechVoice] = useState<string>("Ichiro");
@@ -208,6 +212,17 @@ export default function App() {
           );
         }
         if (parsed.systemFont) setSystemFont(parsed.systemFont);
+        if (parsed.showMonthWatermark !== undefined)
+          setShowMonthWatermark(parsed.showMonthWatermark);
+        if (parsed.monthWatermarkSize) {
+          setMonthWatermarkSize(
+            parsed.monthWatermarkSize === 104 ? 180 : parsed.monthWatermarkSize,
+          );
+        }
+        if (parsed.monthWatermarkOpacity !== undefined)
+          setMonthWatermarkOpacity(parsed.monthWatermarkOpacity);
+        if (parsed.monthWatermarkOffsetY !== undefined)
+          setMonthWatermarkOffsetY(parsed.monthWatermarkOffsetY);
         if (parsed.editorTextSize) setEditorTextSize(parsed.editorTextSize);
         if (parsed.editorMaxWidth) setEditorMaxWidth(parsed.editorMaxWidth);
         if (parsed.editorLineHeight)
@@ -319,6 +334,10 @@ export default function App() {
           dateSize,
           dateFont,
           systemFont,
+          showMonthWatermark,
+          monthWatermarkSize,
+          monthWatermarkOpacity,
+          monthWatermarkOffsetY,
           editorTextSize,
           editorMaxWidth,
           editorLineHeight,
@@ -344,6 +363,10 @@ export default function App() {
     dateSize,
     dateFont,
     systemFont,
+    showMonthWatermark,
+    monthWatermarkSize,
+    monthWatermarkOpacity,
+    monthWatermarkOffsetY,
     editorTextSize,
     editorMaxWidth,
     editorLineHeight,
@@ -952,6 +975,117 @@ export default function App() {
                     style={sliderStyle}
                   />
                 </div>
+
+                {/* MONTH WATERMARK */}
+                <div className="flex flex-col gap-3 pt-3 border-t border-zinc-800/80">
+                  <div
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
+                  >
+                    <span>MONTH WATERMARK</span>
+                    <div className="flex border border-zinc-700/60 p-0.5 shrink-0">
+                      <button
+                        onClick={() => setShowMonthWatermark(true)}
+                        className={`px-3 py-0.5 text-[9px] font-bold transition-colors ${
+                          showMonthWatermark
+                            ? `${colors.activeBg} ${colors.activeText}`
+                            : `${colors.textSub} ${colors.bgHover}`
+                        }`}
+                      >
+                        ON
+                      </button>
+                      <button
+                        onClick={() => setShowMonthWatermark(false)}
+                        className={`px-3 py-0.5 text-[9px] font-bold transition-colors ${
+                          !showMonthWatermark
+                            ? `${colors.activeBg} ${colors.activeText}`
+                            : `${colors.textSub} ${colors.bgHover}`
+                        }`}
+                      >
+                        OFF
+                      </button>
+                    </div>
+                  </div>
+
+                  {showMonthWatermark && (
+                    <div className="flex flex-col gap-2 mt-0.5">
+                      <div className={`text-[8.5px] font-sans ${colors.textSub} tracking-wider`}>
+                        ※ フォントはカレンダー日付フォントと自動連動しています
+                      </div>
+
+                      <div
+                        className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
+                      >
+                        <span>SIZE</span>
+                        <span className={colors.textMain}>{monthWatermarkSize}PX</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="60"
+                        max="240"
+                        step="2"
+                        value={monthWatermarkSize}
+                        onChange={(e) => setMonthWatermarkSize(parseInt(e.target.value))}
+                        className="square-slider w-full"
+                        style={sliderStyle}
+                      />
+
+                      <div
+                        className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-0.5`}
+                      >
+                        <span>OPACITY</span>
+                        <span className={colors.textMain}>{monthWatermarkOpacity}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="3"
+                        max="25"
+                        step="1"
+                        value={monthWatermarkOpacity}
+                        onChange={(e) => setMonthWatermarkOpacity(parseInt(e.target.value))}
+                        className="square-slider w-full"
+                        style={sliderStyle}
+                      />
+
+                      <div
+                        className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-0.5`}
+                      >
+                        <span>VERTICAL POSITION</span>
+                        <span className={colors.textMain}>
+                          {monthWatermarkOffsetY > 0
+                            ? `+${monthWatermarkOffsetY}PX`
+                            : `${monthWatermarkOffsetY}PX`}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-60"
+                        max="60"
+                        step="1"
+                        value={monthWatermarkOffsetY}
+                        onChange={(e) =>
+                          setMonthWatermarkOffsetY(parseInt(e.target.value))
+                        }
+                        className="square-slider w-full"
+                        style={sliderStyle}
+                      />
+
+                      <div className="flex justify-end pt-0.5">
+                        <button
+                          onClick={() => {
+                            setMonthWatermarkSize(180);
+                            setMonthWatermarkOpacity(10);
+                            setMonthWatermarkOffsetY(-15);
+                          }}
+                          title="初期値にリセット (SIZE: 180PX, OPACITY: 10%, VERTICAL: -15PX)"
+                          className={`text-[8.5px] font-mono font-bold px-2 py-1 border ${colors.borderStrong} ${colors.textSub} hover:${colors.textMain} hover:border-slate-400 transition-colors uppercase rounded-[2px] cursor-pointer flex items-center gap-1.5 leading-none shadow-xs`}
+                        >
+                          <span>⟲</span>
+                          <span>RESET TO DEFAULT</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1213,6 +1347,12 @@ export default function App() {
             onResumeFolder={handleResumeFolder}
             onRefresh={handleRefresh}
             theme={theme}
+            systemFont={systemFont}
+            dateFont={dateFont}
+            showMonthWatermark={showMonthWatermark}
+            monthWatermarkSize={monthWatermarkSize}
+            monthWatermarkOpacity={monthWatermarkOpacity}
+            monthWatermarkOffsetY={monthWatermarkOffsetY}
             showLogTitles={showLogTitles}
             setShowLogTitles={setShowLogTitles}
           />
