@@ -205,10 +205,59 @@ export function EditorModal({
       window.speechSynthesis.cancel();
       setIsPlaying(false);
     } else {
-      const target = e.target as HTMLElement;
-      const clickedText = target.innerText || content;
-      if (clickedText.trim()) {
-        speakText(clickedText);
+      const previewEl = previewRef.current;
+      if (!previewEl) return;
+
+      let textToRead = "";
+      let startNode: Node | null = null;
+      let startOffset = 0;
+
+      if (document.caretRangeFromPoint) {
+        const pointRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+        if (pointRange && previewEl.contains(pointRange.startContainer)) {
+          startNode = pointRange.startContainer;
+          startOffset = pointRange.startOffset;
+        }
+      } else if ((document as any).caretPositionFromPoint) {
+        const pos = (document as any).caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos && previewEl.contains(pos.offsetNode)) {
+          startNode = pos.offsetNode;
+          startOffset = pos.offset;
+        }
+      }
+
+      if (startNode) {
+        try {
+          const range = document.createRange();
+          range.setStart(startNode, startOffset);
+          range.setEnd(previewEl, previewEl.childNodes.length);
+          textToRead = range.toString();
+        } catch {
+          // ignore error
+        }
+      }
+
+      // フォールバック: クリックされた要素(target)からpreviewElの末尾まで
+      if (!textToRead.trim()) {
+        const target = e.target as HTMLElement;
+        if (previewEl.contains(target) && target !== previewEl) {
+          try {
+            const range = document.createRange();
+            range.setStartBefore(target);
+            range.setEnd(previewEl, previewEl.childNodes.length);
+            textToRead = range.toString();
+          } catch {
+            // ignore error
+          }
+        }
+      }
+
+      if (!textToRead.trim()) {
+        textToRead = previewEl.innerText || content;
+      }
+
+      if (textToRead.trim()) {
+        speakText(textToRead);
       }
     }
   };
