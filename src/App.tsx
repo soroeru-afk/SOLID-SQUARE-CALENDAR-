@@ -282,6 +282,9 @@ export default function App() {
         window.speechSynthesis.getVoices();
       };
     }
+
+    // Enforce uppercase document title to prevent PWA title duplication
+    document.title = "SOLID SQUARE CALENDAR";
   }, []);
 
   useEffect(() => {
