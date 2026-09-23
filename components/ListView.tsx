@@ -49,11 +49,11 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
            if (theme === "JAPAN") {
              holidayName = JapaneseHolidays.isHoliday(dateObj);
              if (dayOfWeek === 0 || holidayName) {
-               dateNumColor = "text-red-600";
-               dNameColor = "text-red-600";
+               dateNumColor = "text-[#6E0005]";
+               dNameColor = "text-[#6E0005]";
              } else if (dayOfWeek === 6) {
-               dateNumColor = "text-blue-600";
-               dNameColor = "text-blue-600";
+               dateNumColor = "text-[#082666]";
+               dNameColor = "text-[#082666]";
              } else {
                dateNumColor = colors.textMain;
              }
