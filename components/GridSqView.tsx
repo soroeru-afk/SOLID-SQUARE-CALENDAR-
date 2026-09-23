@@ -45,8 +45,8 @@ export function GridSqView({
 
   const getHeaderColor = (idx: number) => {
     if (theme === "JAPAN") {
-      if (idx === 0) return "text-[#6E0005]";
-      if (idx === 6) return "text-[#082666]";
+      if (idx === 0) return "text-red-600";
+      if (idx === 6) return "text-blue-600";
     }
     return colors.textMain;
   };
@@ -100,9 +100,9 @@ export function GridSqView({
           if (theme === "JAPAN") {
             holidayName = JapaneseHolidays.isHoliday(dateStrObj);
             if (dayOfWeek === 0 || holidayName) {
-              dateNumColor = "text-[#6E0005]";
+              dateNumColor = "text-red-600";
             } else if (dayOfWeek === 6) {
-              dateNumColor = "text-[#082666]";
+              dateNumColor = "text-blue-600";
             }
           }
 
