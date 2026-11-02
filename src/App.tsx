@@ -22,6 +22,7 @@ import {
   Palette,
   Maximize,
   Minimize,
+  Check,
 } from "lucide-react";
 
 const FONT_OPTIONS = [
@@ -91,6 +92,15 @@ const FONT_OPTIONS = [
   },
 ];
 
+const THEME_OPTIONS: { value: Theme; label: string; swatch: string }[] = [
+  { value: "LIGHT", label: "LIGHT", swatch: "#5d768d" },
+  { value: "PEPER", label: "PEPER", swatch: "#D95430" },
+  { value: "MONOTONE", label: "MONO", swatch: "#27272a" },
+  { value: "NAVY", label: "NAVY", swatch: "#1c2c40" },
+  { value: "ROSE", label: "RED", swatch: "#8a2525" },
+  { value: "JAPAN", label: "JAPAN", swatch: "#6E0005" },
+];
+
 const loadFontDynamically = (fontValue: string) => {
   const fontOption = FONT_OPTIONS.find((f) => f.value === fontValue);
   if (fontOption && fontOption.family) {
@@ -132,6 +142,8 @@ export default function App() {
     useState<boolean>(false);
   const [showLogTitlesList, setShowLogTitlesList] = useState<boolean>(true);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
   const [settingsTab, setSettingsTab] = useState<
     "GENERAL" | "EDITOR" | "AUDIO"
   >("GENERAL");
@@ -166,10 +178,10 @@ export default function App() {
           }
           const match = jaVoices.find((v) => {
             const name = v.name.toLowerCase();
-            if (currentVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一郎"))) return true;
-            if (currentVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥香"))) return true;
-            if (currentVoice === "Ayumi" && (name.includes("ayumi") || name.includes("あゆみ"))) return true;
-            if (currentVoice === "Ayaka" && (name.includes("ayaka") || name.includes("綾香"))) return true;
+            if (currentVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一朗"))) return true;
+            if (currentVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥"))) return true;
+            if (currentVoice === "Ayumi" && (name.includes("ayumi") || name.includes("歩"))) return true;
+            if (currentVoice === "Ayaka" && (name.includes("ayaka") || name.includes("彩香"))) return true;
             return false;
           });
           if (match) {
@@ -305,8 +317,11 @@ export default function App() {
       case "NAVY":
         metaColor = "#060A11";
         break;
+      case "PEPER":
+        metaColor = "#F2EFE6";
+        break;
     }
-    
+
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
@@ -321,6 +336,20 @@ export default function App() {
     loadFontDynamically(dateFont);
     loadFontDynamically(systemFont);
   }, [textFont, dateFont, systemFont]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setIsThemeDropdownOpen(false);
+      }
+    };
+    if (isThemeDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isThemeDropdownOpen]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -702,6 +731,10 @@ export default function App() {
     sliderBorder = "#cbd5e1";
     sliderTrack = "#e2e8f0";
     sliderThumb = "#000000";
+  } else if (theme === "PEPER") {
+    sliderBorder = "#73634F";
+    sliderTrack = "#E5DEC9";
+    sliderThumb = "#D95430";
   } else {
     sliderBorder = "#334155";
     sliderTrack = "#1e293b";
@@ -712,6 +745,7 @@ export default function App() {
     "--slider-border": sliderBorder,
     "--slider-track": sliderTrack,
     "--slider-thumb": sliderThumb,
+    backgroundColor: theme === "PEPER" ? "#ffffff" : "transparent",
   } as React.CSSProperties;
 
   const showLogTitles =
@@ -724,7 +758,12 @@ export default function App() {
     }
   };
 
-  const controlTextClass = (theme === "LIGHT" || theme === "JAPAN") ? "text-slate-500" : colors.textMain;
+  const controlTextClass =
+    (theme === "LIGHT" || theme === "JAPAN")
+      ? "text-slate-500"
+      : theme === "PEPER"
+        ? "text-[#73634F]"
+        : colors.textMain;
 
   return (
     <div
@@ -738,7 +777,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`w-6 h-6 border ${colors.border} flex items-center justify-center text-[10px] ${colors.textSub} ${colors.accentBgHover} transition-colors`}
+            className={`w-6 h-6 border ${colors.border} ${theme === "PEPER" ? "bg-white" : ""} flex items-center justify-center text-[10px] ${colors.textSub} ${colors.accentBgHover} transition-colors`}
             title="Toggle Sidebar"
           >
             {isSidebarOpen ? (
@@ -763,12 +802,12 @@ export default function App() {
                 document.exitFullscreen().catch(() => {});
               }
             }}
-            className={`w-6 h-6 flex items-center justify-center border ${colors.border} ${colors.textSub} ${colors.accentBgHover} transition-colors`}
+            className={`w-6 h-6 flex items-center justify-center border ${colors.border} ${theme === "PEPER" ? "bg-white" : ""} ${colors.textSub} ${colors.accentBgHover} transition-colors`}
           >
             {document.fullscreenElement ? <Minimize size={12} /> : <Maximize size={12} />}
           </button>
 
-          <div className={`hidden md:flex items-center gap-2 border ${colors.border} px-2 h-6`}>
+          <div className={`hidden md:flex items-center gap-2 border ${colors.border} ${theme === "PEPER" ? "bg-white" : ""} px-2 h-6`}>
              <span className={`text-[10px] font-bold ${controlTextClass} tracking-widest`}>SIZE</span>
              <div className="w-20 h-full flex items-center">
                <input
@@ -784,7 +823,7 @@ export default function App() {
              <span className={`text-[10px] font-bold ${controlTextClass} tracking-widest min-w-[32px] text-right`}>{dateSize}PX</span>
           </div>
 
-          <div className={`hidden md:flex relative items-center h-6 border ${colors.border} pl-2 pr-1 w-32`}>
+          <div className={`hidden md:flex relative items-center h-6 border ${colors.border} ${theme === "PEPER" ? "bg-white" : ""} pl-2 pr-1 w-32`}>
             <select
               value={dateFont}
               onChange={(e) => setDateFont(e.target.value)}
@@ -799,26 +838,125 @@ export default function App() {
             <ChevronDown size={10} className={`absolute right-1 ${colors.textSub} pointer-events-none`} />
           </div>
 
-          <button
-            onClick={() => {
-              const themes: Theme[] = ["LIGHT", "NAVY", "MONOTONE", "ROSE", "JAPAN"];
-              const idx = themes.indexOf(theme as Theme);
-              setTheme(themes[(idx + 1) % themes.length]);
-            }}
-            className={`hidden md:flex items-center justify-center gap-2 h-6 border ${colors.border} px-2 ${controlTextClass} ${colors.accentBgHover} transition-colors text-[10px] font-bold tracking-widest uppercase w-32`}
-          >
-            <Palette size={12} className={`shrink-0 ${colors.textSub}`} />
-            <span className="w-full text-left truncate">THEME: {theme}</span>
-          </button>
+          {/* THEME TOGGLE (NAME) & PULLDOWN (ARROW) */}
+          <div className="relative hidden md:block" ref={themeMenuRef}>
+            <div
+              className={`flex items-stretch h-6 border ${colors.border} ${theme === "PEPER" ? "bg-white" : colors.panelBg} rounded-[2px] transition-colors`}
+            >
+              {/* Left Button: Swatch + Theme Name (Click to Toggle) */}
+              <button
+                type="button"
+                onClick={() => {
+                  const idx = THEME_OPTIONS.findIndex((t) => t.value === theme);
+                  const nextTheme = THEME_OPTIONS[(idx + 1) % THEME_OPTIONS.length].value;
+                  setTheme(nextTheme);
+                }}
+                className={`h-full flex items-center gap-1.5 px-2 cursor-pointer ${theme === "PEPER" ? "hover:bg-slate-50" : colors.accentBgHover} transition-colors select-none`}
+                title="クリックで次のテーマへ切り替え (トグル)"
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-xs"
+                  style={{
+                    backgroundColor:
+                      THEME_OPTIONS.find((t) => t.value === theme)?.swatch || "#D95430",
+                  }}
+                />
+                <span
+                  className={`text-[10px] font-bold ${controlTextClass} tracking-widest uppercase`}
+                >
+                  {THEME_OPTIONS.find((t) => t.value === theme)?.label || theme}
+                </span>
+              </button>
+
+              {/* Right Button: Arrow (Click to Open Dropdown) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsThemeDropdownOpen((prev) => !prev);
+                }}
+                className={`h-full px-1.5 flex items-center justify-center border-l ${colors.border} ${theme === "PEPER" ? "hover:bg-slate-50" : colors.accentBgHover} cursor-pointer transition-colors`}
+                title="テーマ一覧を開く (プルダウン)"
+              >
+                <span
+                  className={`text-[7px] leading-none ${colors.textSub} select-none transition-transform duration-150 inline-block ${
+                    isThemeDropdownOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  ▼
+                </span>
+              </button>
+            </div>
+
+            {/* Dropdown Menu (Exact design from user screenshot) */}
+            {isThemeDropdownOpen && (
+              <div
+                className="absolute top-8 right-0 w-44 bg-white border border-[#73634F]/30 rounded-md shadow-2xl py-1 z-50 text-slate-800"
+                style={{
+                  boxShadow:
+                    "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.15)",
+                }}
+              >
+                {/* Header: 🎨 テーマ切り替え */}
+                <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 text-xs font-bold text-slate-700 select-none">
+                  <span className="text-sm">🎨</span>
+                  <span>テーマ切り替え</span>
+                </div>
+
+                {/* Theme List */}
+                <div className="py-1 flex flex-col">
+                  {THEME_OPTIONS.map((t) => {
+                    const isSelected = theme === t.value;
+                    return (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => {
+                          setTheme(t.value);
+                          setIsThemeDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 flex items-center justify-between text-left transition-colors cursor-pointer text-xs font-bold ${
+                          isSelected
+                            ? "bg-[#FCEEEA] text-[#D95430]"
+                            : "text-slate-800 hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          {/* Radio style circle indicator */}
+                          <div
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              isSelected ? "border-[#D95430]" : "border-slate-500"
+                            }`}
+                          >
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{
+                                backgroundColor: isSelected ? "#D95430" : t.swatch,
+                              }}
+                            />
+                          </div>
+                          <span className="tracking-wider">{t.label}</span>
+                        </div>
+
+                        {isSelected && (
+                          <Check size={14} className="text-[#D95430] stroke-[2.5]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div
             className={`${colors.textSub} text-[10px] uppercase font-bold tracking-widest hidden md:block ml-1`}
           >
-            v1.2.0 OS
+            v1.2.1 OS
           </div>
           <button
             onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-            className={`w-8 h-8 flex items-center justify-center border ${isThemeMenuOpen ? colors.activeBg : colors.border} ${isThemeMenuOpen ? colors.activeText : colors.textSub} ${colors.accentBgHover} transition-colors ml-1`}
+            className={`w-8 h-8 flex items-center justify-center border ${isThemeMenuOpen ? colors.activeBg : colors.border} ${isThemeMenuOpen ? colors.activeText : theme === "PEPER" ? "bg-white text-[#73634F]" : colors.textSub} ${colors.accentBgHover} transition-colors ml-1`}
           >
             <Settings2 size={16} />
           </button>
@@ -827,15 +965,21 @@ export default function App() {
         {/* SETTINGS POPOVER */}
         {isThemeMenuOpen && (
           <div
-            className={`absolute top-12 right-4 w-72 border ${colors.borderStrong} ${colors.panelBg} ${colors.shadowLg} flex flex-col p-4 gap-4 max-h-[80vh] overflow-y-auto`}
+            className={`absolute top-12 right-4 w-80 border ${colors.borderStrong} ${colors.panelBg} ${colors.shadowLg} flex flex-col p-4 gap-3 max-h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden no-scrollbar`}
           >
             {/* TABS */}
-            <div className="flex border-b border-black/10 dark:border-white/10 mb-2">
+            <div className="flex border-b border-black/10 dark:border-white/10 mb-1">
               {(["GENERAL", "EDITOR", "AUDIO"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSettingsTab(tab)}
-                  className={`flex-1 py-1.5 text-[10px] font-bold tracking-widest ${settingsTab === tab ? `${colors.activeText} border-b-2 border-current` : `${colors.textSub} opacity-50`}`}
+                  className={`flex-1 py-1.5 text-[10px] font-bold tracking-widest ${
+                    settingsTab === tab
+                      ? theme === "PEPER"
+                        ? "text-[#D95430] border-b-2 border-[#D95430]"
+                        : `${colors.activeText} border-b-2 border-current`
+                      : `${colors.textSub} opacity-60 hover:opacity-100`
+                  }`}
                 >
                   {tab}
                 </button>
@@ -843,9 +987,9 @@ export default function App() {
             </div>
 
             {settingsTab === "GENERAL" && (
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-3.5 w-full overflow-x-hidden pb-3">
                 {/* THEME */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div
                     className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
@@ -853,44 +997,28 @@ export default function App() {
                     <span className={colors.textMain}>{theme}</span>
                   </div>
                   <div
-                    className="flex bg-black/10 border border-black/20 p-0.5"
+                    className="grid grid-cols-6 bg-black/10 border border-black/20 p-0.5"
                     style={{ borderColor: "var(--border-color)" }}
                   >
-                    <button
-                      onClick={() => setTheme("LIGHT")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "LIGHT" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                    >
-                      LIGHT
-                    </button>
-                    <button
-                      onClick={() => setTheme("NAVY")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "NAVY" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                    >
-                      NAVY
-                    </button>
-                    <button
-                      onClick={() => setTheme("MONOTONE")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "MONOTONE" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                    >
-                      MONO
-                    </button>
-                    <button
-                      onClick={() => setTheme("ROSE")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "ROSE" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                    >
-                      RED
-                    </button>
-                    <button
-                      onClick={() => setTheme("JAPAN")}
-                      className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${theme === "JAPAN" ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
-                    >
-                      JAPAN
-                    </button>
+                    {THEME_OPTIONS.map((t) => (
+                      <button
+                        key={t.value}
+                        onClick={() => setTheme(t.value)}
+                        className={`py-1 text-[9px] font-bold font-mono tracking-wider flex items-center justify-center gap-1 ${theme === t.value ? `${colors.activeBg} ${colors.activeText} shadow-sm` : colors.textSub}`}
+                        title={t.label}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ backgroundColor: t.swatch }}
+                        />
+                        {t.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {/* SYSTEM FONT */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   <div
                     className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
@@ -900,7 +1028,7 @@ export default function App() {
                     <select
                       value={systemFont}
                       onChange={(e) => setSystemFont(e.target.value)}
-                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
+                      className={`w-full appearance-none border ${colors.borderStrong} ${theme === "PEPER" ? "bg-white" : "bg-transparent"} px-3 py-1.5 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                       style={{ fontFamily: systemFont }}
                     >
                       <option
@@ -931,8 +1059,8 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* DATE NUMBER */}
-                <div className="flex flex-col gap-3">
+                {/* DATE FONT */}
+                <div className="flex flex-col gap-2">
                   <div
                     className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
@@ -942,7 +1070,7 @@ export default function App() {
                     <select
                       value={dateFont}
                       onChange={(e) => setDateFont(e.target.value)}
-                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
+                      className={`w-full appearance-none border ${colors.borderStrong} ${theme === "PEPER" ? "bg-white" : "bg-transparent"} px-3 py-1.5 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                       style={{ fontFamily: dateFont }}
                     >
                       {FONT_OPTIONS.map((opt) => (
@@ -962,7 +1090,7 @@ export default function App() {
                     />
                   </div>
                   <div
-                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-1`}
+                    className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-0.5`}
                   >
                     <span>SIZE</span>
                     <span className={colors.textMain}>{dateSize}PX</span>
@@ -974,24 +1102,24 @@ export default function App() {
                     step="2"
                     value={dateSize}
                     onChange={(e) => setDateSize(parseInt(e.target.value))}
-                    className="square-slider"
+                    className="square-slider w-full"
                     style={sliderStyle}
                   />
                 </div>
 
-                {/* MONTH WATERMARK */}
-                <div className="flex flex-col gap-3 pt-3 border-t border-zinc-800/80">
+                {/* MONTH WATERMARK (SIDEBAR MINI CALENDAR) */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-dashed border-zinc-700/40">
                   <div
                     className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between`}
                   >
                     <span>MONTH WATERMARK</span>
-                    <div className="flex border border-zinc-700/60 p-0.5 shrink-0">
+                    <div className={`flex border ${theme === "PEPER" ? "border-[#73634F] bg-white" : "border-zinc-700/60"} p-0.5 shrink-0`}>
                       <button
                         onClick={() => setShowMonthWatermark(true)}
                         className={`px-3 py-0.5 text-[9px] font-bold transition-colors ${
                           showMonthWatermark
                             ? `${colors.activeBg} ${colors.activeText}`
-                            : `${colors.textSub} ${colors.bgHover}`
+                            : `${colors.textSub} ${theme === "PEPER" ? "bg-white" : colors.bgHover}`
                         }`}
                       >
                         ON
@@ -1001,7 +1129,7 @@ export default function App() {
                         className={`px-3 py-0.5 text-[9px] font-bold transition-colors ${
                           !showMonthWatermark
                             ? `${colors.activeBg} ${colors.activeText}`
-                            : `${colors.textSub} ${colors.bgHover}`
+                            : `${colors.textSub} ${theme === "PEPER" ? "bg-white" : colors.bgHover}`
                         }`}
                       >
                         OFF
@@ -1048,7 +1176,6 @@ export default function App() {
                         className="square-slider w-full"
                         style={sliderStyle}
                       />
-
                       <div
                         className={`text-[10px] font-bold ${colors.textMain} tracking-widest flex items-center justify-between mt-0.5`}
                       >
@@ -1080,7 +1207,7 @@ export default function App() {
                             setMonthWatermarkOffsetY(-15);
                           }}
                           title="初期値にリセット (SIZE: 180PX, OPACITY: 10%, VERTICAL: -15PX)"
-                          className={`text-[8.5px] font-mono font-bold px-2 py-1 border ${colors.borderStrong} ${colors.textSub} hover:${colors.textMain} hover:border-slate-400 transition-colors uppercase rounded-[2px] cursor-pointer flex items-center gap-1.5 leading-none shadow-xs`}
+                          className={`text-[8.5px] font-mono font-bold px-2 py-1 border ${colors.borderStrong} ${theme === "PEPER" ? "bg-white text-[#73634F]" : colors.textSub} hover:${colors.textMain} hover:border-slate-400 transition-colors uppercase rounded-[2px] cursor-pointer flex items-center gap-1.5 leading-none shadow-xs`}
                         >
                           <span>⟲</span>
                           <span>RESET TO DEFAULT</span>
@@ -1105,7 +1232,7 @@ export default function App() {
                     <select
                       value={textFont}
                       onChange={(e) => setTextFont(e.target.value)}
-                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
+                      className={`w-full appearance-none border ${colors.borderStrong} ${theme === "PEPER" ? "bg-white" : "bg-transparent"} px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                       style={{ fontFamily: textFont }}
                     >
                       {FONT_OPTIONS.map((opt) => (
@@ -1228,7 +1355,7 @@ export default function App() {
                     <select
                       value={speechVoice}
                       onChange={(e) => setSpeechVoice(e.target.value)}
-                      className={`w-full appearance-none border ${colors.borderStrong} bg-transparent px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors`}
+                      className={`w-full appearance-none border ${colors.borderStrong} ${theme === "PEPER" ? "bg-white" : "bg-transparent"} px-3 py-2 text-xs font-bold tracking-wider ${colors.textMain} outline-none cursor-pointer hover:border-slate-500 transition-colors uppercase`}
                     >
                       {availableVoices.length > 0 ? (
                         availableVoices.map((v) => (
@@ -1242,13 +1369,22 @@ export default function App() {
                         ))
                       ) : (
                         <>
-                          <option value="Ichiro" className="bg-slate-900 text-slate-100 py-1">
+                          <option
+                            value="Ichiro"
+                            className="bg-slate-900 text-slate-100 py-1"
+                          >
                             Ichiro (JP)
                           </option>
-                          <option value="Ayumi" className="bg-slate-900 text-slate-100 py-1">
+                          <option
+                            value="Ayumi"
+                            className="bg-slate-900 text-slate-100 py-1"
+                          >
                             Ayumi (JP)
                           </option>
-                          <option value="Haruka" className="bg-slate-900 text-slate-100 py-1">
+                          <option
+                            value="Haruka"
+                            className="bg-slate-900 text-slate-100 py-1"
+                          >
                             Haruka (JP)
                           </option>
                         </>

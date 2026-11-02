@@ -99,11 +99,13 @@
 .overlay-preview {
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  transition: opacity 0.1s ease, visibility 0.1s ease;
 }
 .group:hover > .overlay-preview {
   opacity: var(--preview-opacity, 1);
   visibility: visible;
+  pointer-events: auto;
 }
 
 /* Diagonal stripe pattern for Today */
@@ -122,6 +124,16 @@
     -45deg,
     rgba(15, 23, 42, 0.045),
     rgba(15, 23, 42, 0.045) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.today-stripe-peper {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(217, 84, 48, 0.07),
+    rgba(217, 84, 48, 0.07) 5px,
     transparent 5px,
     transparent 10px
   );

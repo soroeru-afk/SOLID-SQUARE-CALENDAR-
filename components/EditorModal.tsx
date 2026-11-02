@@ -35,7 +35,7 @@ export function EditorModal({
   speechRate = 2.0,
   speechVolume = 1.0,
   speechPitch = 1.0,
-  onNavigate,
+          onNavigate,
   hasPrev,
   hasNext,
 }: any) {
@@ -130,10 +130,10 @@ export function EditorModal({
       voices.find((v) => v.name.includes(speechVoice)) ||
       voices.find((v) => {
         const name = v.name.toLowerCase();
-        if (speechVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一郎"))) return true;
-        if (speechVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥香"))) return true;
-        if (speechVoice === "Ayumi" && (name.includes("ayumi") || name.includes("あゆみ"))) return true;
-        if (speechVoice === "Ayaka" && (name.includes("ayaka") || name.includes("綾香"))) return true;
+        if (speechVoice === "Ichiro" && (name.includes("ichiro") || name.includes("一朗"))) return true;
+        if (speechVoice === "Haruka" && (name.includes("haruka") || name.includes("はるか") || name.includes("遥"))) return true;
+        if (speechVoice === "Ayumi" && (name.includes("ayumi") || name.includes("歩"))) return true;
+        if (speechVoice === "Ayaka" && (name.includes("ayaka") || name.includes("彩香"))) return true;
         return false;
       }) ||
       voices.find((v) => v.lang.includes("ja-JP")) ||
@@ -267,7 +267,8 @@ export function EditorModal({
     const el = isEditing ? textareaRef.current : previewRef.current;
     if (!el) return;
 
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = (event: Event) => {
+      const e = event as WheelEvent;
       if (isVertical && e.deltaY !== 0) {
         e.preventDefault();
         // Since vertical-rl flow relies on horizontal scrolling, map deltaY to scrollLeft.
@@ -567,6 +568,18 @@ export function EditorModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [content, log, handleSave, onClose, isEditing, hasPrev, hasNext, onNavigate, scrollToBeginning, scrollToEnd]);
 
+  const formattedDate = (() => {
+    if (!log.dateStr || log.dateStr.length !== 8) return "";
+    const year = log.dateStr.substring(0, 4);
+    const month = log.dateStr.substring(4, 6);
+    const day = log.dateStr.substring(6, 8);
+    
+    if (theme === "JAPAN" || theme === "PEPER") {
+      return `${year}年${parseInt(month, 10)}月${parseInt(day, 10)}日`;
+    }
+    return `${year} / ${month} / ${day}`;
+  })();
+
   return (
     <AnimatePresence>
       <motion.div
@@ -594,7 +607,7 @@ export function EditorModal({
             <button
               onClick={onClose}
               title="閉じる"
-              className={`absolute top-3 right-3 z-50 ${colors.borderStrong} border px-1.5 py-0.5 rounded-sm ${colors.textSubHover} transition-colors flex items-center justify-center cursor-pointer`}
+              className={`absolute top-3 right-3 z-50 ${colors.borderStrong} border px-1.5 py-0.5 rounded-sm bg-white ${colors.textSubHover} transition-colors flex items-center justify-center cursor-pointer`}
             >
               <X size={12} strokeWidth={2.5} />
             </button>
@@ -612,23 +625,17 @@ export function EditorModal({
               >
                 {displayTitle}
               </div>
-              <div
-                className={`mt-2 flex items-baseline gap-3 w-full`}
-              >
-                <span className={`flex-shrink-0 font-bold tracking-wider text-sm ${colors.textMain}`}>
-                  {(() => {
-                    const dStr = log.dateStr;
-                    if (!dStr || dStr.length !== 8) return "";
-                    const year = dStr.substring(0, 4);
-                    const month = parseInt(dStr.substring(4, 6), 10);
-                    const day = parseInt(dStr.substring(6, 8), 10);
-                    if (theme === "JAPAN") {
-                      return `${year}年${month}月${day}日`;
-                    }
-                    return `${year} / ${dStr.substring(4, 6)} / ${dStr.substring(6, 8)}`;
-                  })()}
-                </span>
-                <span className={`text-[10px] ${colors.textSub} opacity-40 truncate`}>{log.name}</span>
+              <div className="mt-2 flex items-center flex-wrap gap-2">
+                {formattedDate && (
+                  <div className={`text-xs font-bold ${colors.textMain} opacity-80`}>
+                    {formattedDate}
+                  </div>
+                )}
+                <div
+                  className={`text-[10px] ${colors.textSub} opacity-40 truncate`}
+                >
+                  {log.name}
+                </div>
               </div>
             </div>
 
@@ -640,7 +647,7 @@ export function EditorModal({
                 {/* Text Size Controls */}
                 {setEditorTextSize && (
                   <div
-                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm`}
+                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm bg-white`}
                   >
                   <button
                     onClick={decreaseTextSize}
@@ -669,7 +676,7 @@ export function EditorModal({
               <div className="flex items-center gap-2">
                 {setEditorMaxWidth && (
                   <div
-                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm`}
+                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm bg-white`}
                     title="幅"
                   >
                     <span className="opacity-50">W:</span>
@@ -697,7 +704,7 @@ export function EditorModal({
 
                 {setEditorLineHeight && (
                   <div
-                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm`}
+                    className={`flex items-center gap-2 ${colors.borderStrong} border px-2 py-0.5 rounded-sm bg-white`}
                     title="行間"
                   >
                     <span className="opacity-50">LH:</span>
@@ -741,21 +748,21 @@ export function EditorModal({
                 <button
                   onClick={() => setTextAlign("left")}
                   title="左寄せ"
-                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "left" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "left" ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 >
                   <AlignLeft size={14} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={() => setTextAlign("center")}
                   title="中央寄せ"
-                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "center" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "center" ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 >
                   <AlignCenter size={14} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={() => setTextAlign("right")}
                   title="右寄せ"
-                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "right" ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${textAlign === "right" ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 >
                   <AlignRight size={14} strokeWidth={2.5} />
                 </button>
@@ -768,14 +775,14 @@ export function EditorModal({
                 <button
                   onClick={() => setIsVertical(false)}
                   title="横書き"
-                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${!isVertical ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${!isVertical ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 >
                   HORIZ
                 </button>
                 <button
                   onClick={() => setIsVertical(true)}
                   title="縦書き"
-                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${isVertical ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                  className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${isVertical ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 >
                   VERT
                 </button>
@@ -786,7 +793,7 @@ export function EditorModal({
               <button
                 onClick={() => setIsPaperMode(!isPaperMode)}
                 title="ペーパーモード"
-                className={`${colors.borderStrong} border px-2 py-0.5 rounded-sm transition-colors ${isPaperMode ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                className={`w-[92px] justify-center text-center ${colors.borderStrong} border py-0.5 rounded-sm inline-flex items-center transition-colors ${isPaperMode ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
               >
                 PAPER / {isPaperMode ? "ON" : "OFF"}
               </button>
@@ -796,7 +803,7 @@ export function EditorModal({
               {/* Play Button */}
               <button
                 onClick={toggleSpeech}
-                className={`flex items-center gap-2 ${colors.borderStrong} border px-3 py-0.5 rounded-sm ${isPlaying ? colors.activeText : ""} ${colors.bgHover} transition-colors`}
+                className={`flex items-center gap-2 ${colors.borderStrong} border px-3 py-0.5 rounded-sm transition-colors ${isPlaying ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
                 title={isPlaying ? "STOP" : "VOICE"}
               >
                 {isPlaying ? (
@@ -817,7 +824,7 @@ export function EditorModal({
                   }
                 }}
                 title={isEditing ? "プレビュー表示に戻る" : "テキスト編集モードにする"}
-                className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${isEditing ? colors.activeText + " " + colors.activeBg : colors.textSubHover}`}
+                className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${isEditing ? colors.activeText + " " + colors.activeBg : `bg-white ${colors.textSubHover}`}`}
               >
                 {isEditing ? "VIEW" : "EDIT"}
               </button>
@@ -826,7 +833,7 @@ export function EditorModal({
               <button
                 onClick={handleSave}
                 title="保存 (Ctrl+S)"
-                className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm ${colors.textSubHover} transition-colors flex items-center gap-1`}
+                className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm bg-white ${colors.textSubHover} transition-colors flex items-center gap-1`}
               >
                 <span className="opacity-50">[CTRL+S]</span> SAVE
               </button>
@@ -840,7 +847,7 @@ export function EditorModal({
                     onClick={() => hasPrev && onNavigate('PREV')}
                     disabled={!hasPrev}
                     title="古いファイルへ"
-                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasPrev ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
+                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors bg-white ${hasPrev ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     PREV
                   </button>
@@ -848,7 +855,7 @@ export function EditorModal({
                     onClick={() => hasNext && onNavigate('NEXT')}
                     disabled={!hasNext}
                     title="新しいファイルへ"
-                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors ${hasNext ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
+                    className={`${colors.borderStrong} border px-3 py-0.5 rounded-sm flex items-center transition-colors bg-white ${hasNext ? colors.textSubHover : "opacity-30 cursor-not-allowed"}`}
                   >
                     NEXT
                   </button>

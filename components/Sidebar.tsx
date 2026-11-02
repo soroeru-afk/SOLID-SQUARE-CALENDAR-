@@ -29,13 +29,13 @@ export function Sidebar({
   
   const yyyy = currentDate.getFullYear();
   const monthNum = currentDate.getMonth() + 1;
-  const mmName = theme === "JAPAN" 
+  const mmName = (theme === "JAPAN" || theme === "PEPER") 
     ? `${monthNum}月` 
     : currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colors = getThemeColors(theme as Theme);
 
-  const miniDays = theme === "JAPAN" ? ['日', '月', '火', '水', '木', '金', '土'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const miniDays = (theme === "JAPAN" || theme === "PEPER") ? ['日', '月', '火', '水', '木', '金', '土'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -132,7 +132,11 @@ export function Sidebar({
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button 
             onClick={() => setViewMode('SQUARE')}
-            className={`py-1.5 text-[10px] font-bold border flex items-center justify-center gap-2 transition-colors ${viewMode === 'SQUARE' ? `${colors.activeBg} ${colors.borderStrong} ${colors.textMain}` : `${colors.border} ${colors.textSub} ${colors.textSubHover}`}`}>
+            className={`py-1.5 text-[10px] font-bold border flex items-center justify-center gap-2 transition-colors ${
+              viewMode === 'SQUARE' 
+                ? `${colors.activeBg} ${colors.borderStrong} ${colors.activeText} shadow-xs` 
+                : `${colors.border} ${theme === 'PEPER' ? 'bg-white' : ''} ${colors.textSub} ${colors.textSubHover}`
+            }`}>
             <div className="flex flex-wrap w-2 h-2 gap-[1px]">
               <div className="w-[3px] h-[3px] bg-current"></div>
               <div className="w-[3px] h-[3px] bg-current"></div>
@@ -144,7 +148,11 @@ export function Sidebar({
 
           <button 
             onClick={() => setViewMode('LIST')}
-            className={`py-1.5 text-[10px] font-bold border flex items-center justify-center gap-2 transition-colors ${viewMode === 'LIST' ? `${colors.activeBg} ${colors.borderStrong} ${colors.textMain}` : `${colors.border} ${colors.textSub} ${colors.textSubHover}`}`}>
+            className={`py-1.5 text-[10px] font-bold border flex items-center justify-center gap-2 transition-colors ${
+              viewMode === 'LIST' 
+                ? `${colors.activeBg} ${colors.borderStrong} ${colors.activeText} shadow-xs` 
+                : `${colors.border} ${theme === 'PEPER' ? 'bg-white' : ''} ${colors.textSub} ${colors.textSubHover}`
+            }`}>
             <span className="opacity-70">≡</span> LIST
           </button>
         </div>
@@ -155,9 +163,9 @@ export function Sidebar({
             <span>SHOW LOG TITLES</span>
             <span className={colors.textMain}>{showLogTitles ? 'ON' : 'OFF'}</span>
           </div>
-          <div className={`flex border ${colors.borderStrong} p-0.5`} style={{ backgroundColor: theme === 'LIGHT' ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.2)' }}>
-            <button onClick={() => setShowLogTitles(true)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : colors.textSub}`}>ON</button>
-            <button onClick={() => setShowLogTitles(false)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${!showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : colors.textSub}`}>OFF</button>
+          <div className={`flex border ${colors.borderStrong} p-0.5`} style={{ backgroundColor: (theme === 'LIGHT' || theme === 'PEPER') ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.2)' }}>
+            <button onClick={() => setShowLogTitles(true)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : `${theme === 'PEPER' ? 'bg-white' : ''} ${colors.textSub}`}`}>ON</button>
+            <button onClick={() => setShowLogTitles(false)} className={`flex-1 py-1 text-xs font-bold font-mono tracking-widest ${!showLogTitles ? `${colors.activeBg} ${colors.activeText} shadow-sm border ${colors.borderStrong}` : `${theme === 'PEPER' ? 'bg-white' : ''} ${colors.textSub}`}`}>OFF</button>
           </div>
         </div>
       </div>
@@ -173,7 +181,7 @@ export function Sidebar({
             </button>
           )}
           <div className="flex gap-2">
-            <button onClick={onNewFolder} className={`flex-1 border ${colors.border} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>
+            <button onClick={onNewFolder} className={`flex-1 border ${colors.border} ${theme === 'PEPER' ? 'bg-white' : ''} py-1.5 text-[10px] ${colors.textSub} ${colors.textSubHover} ${colors.borderHover} transition-colors`}>
               フォルダーを開く (CONNECT)
             </button>
           </div>
@@ -181,7 +189,7 @@ export function Sidebar({
 
         <button 
           onClick={() => fileInputRef.current?.click()}
-          className={`w-full mt-3 border ${colors.border} border-dashed py-2 text-[10px] ${colors.textSub} ${colors.accentBgHover} flex flex-col items-center justify-center gap-1 transition-colors`}>
+          className={`w-full mt-3 border ${colors.border} ${theme === 'PEPER' ? 'bg-white' : ''} border-dashed py-2 text-[10px] ${colors.textSub} ${colors.accentBgHover} flex flex-col items-center justify-center gap-1 transition-colors`}>
            <span className="font-bold">↓ DIRECTORY IMPORT</span>
            <span className="text-[8px] opacity-70">MEMORY ONLY / iFrame SAFE</span>
         </button>

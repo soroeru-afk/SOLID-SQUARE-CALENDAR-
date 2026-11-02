@@ -19,7 +19,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
     return logsByDate[dateStr] || [];
   };
 
-  const dayNames = theme === "JAPAN" 
+  const dayNames = (theme === "JAPAN" || theme === "PEPER") 
     ? ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"] 
     : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -46,14 +46,14 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
            let dNameColor = colors.textMain;
            let holidayName = undefined;
 
-           if (theme === "JAPAN") {
+           if (theme === "JAPAN" || theme === "PEPER") {
              holidayName = JapaneseHolidays.isHoliday(dateObj);
              if (dayOfWeek === 0 || holidayName) {
-               dateNumColor = "text-[#6E0005]";
-               dNameColor = "text-[#6E0005]";
+               dateNumColor = theme === "PEPER" ? "text-[#D95430]" : "text-[#6E0005]";
+               dNameColor = theme === "PEPER" ? "text-[#D95430]" : "text-[#6E0005]";
              } else if (dayOfWeek === 6) {
-               dateNumColor = "text-[#082666]";
-               dNameColor = "text-[#082666]";
+               dateNumColor = theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
+               dNameColor = theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
              } else {
                dateNumColor = colors.textMain;
              }
@@ -62,7 +62,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
            return (
              <div 
                key={dateStr} 
-               className={`relative w-full flex border-b ${colors.border} group transition-colors ${
+               className={`relative w-full flex border-b ${colors.border} ${theme === "PEPER" ? "bg-white" : ""} group transition-colors ${
                  isToday ? `ring-1 ring-inset ${colors.todayRing}` : ""
                }`}
              >
@@ -79,7 +79,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                  {isToday && (
                    <div className="mb-1.5">
                      <span className={`px-1.5 py-0.5 text-[9px] font-bold font-sans tracking-wider leading-none select-none rounded-[2px] shadow-xs ${colors.todayBadge}`}>
-                       {theme === "JAPAN" ? "今日" : "TODAY"}
+                       {(theme === "JAPAN" || theme === "PEPER") ? "今日" : "TODAY"}
                      </span>
                    </div>
                  )}

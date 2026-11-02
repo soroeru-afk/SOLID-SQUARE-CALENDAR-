@@ -1,8 +1,40 @@
-export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "ROSE" | "JAPAN";
+export type Theme = "NAVY" | "LIGHT" | "MONOTONE" | "ROSE" | "JAPAN" | "PEPER";
 export type TextSize = "SM" | "MD" | "LG";
 export type FontType = "SANS" | "MONO" | "SERIF";
 
 export function getThemeColors(theme: Theme) {
+  if (theme === "PEPER") {
+    return {
+      isDark: false,
+      bg: "bg-[#F2EFE6]",
+      bgHover: "hover:bg-[#EBE4D5]",
+      panelBg: "bg-[#EBE4D5]",
+      itemBg: "bg-white",
+      itemBgHover: "hover:bg-[#FAF8F5]",
+      border: "border-[#73634F]/35",
+      borderStrong: "border-[#73634F]",
+      borderHover: "hover:border-[#73634F]",
+      textMain: "text-[#2D2319]",
+      textSub: "text-[#73634F]",
+      textSubHover: "hover:text-[#2D2319]",
+      textDim: "text-[#8C7D6B]",
+      dateNum: "text-[#73634F]",
+      dateNumToday: "text-[#D95430]",
+      accentBg: "bg-[#E5DEC9]",
+      accentBgHover: "hover:bg-[#DACFBA]",
+      activeBg: "bg-[#D95430]",
+      activeText: "text-white",
+      ring: "ring-[#73634F]/40",
+      todayRing: "ring-[#D95430]",
+      todayBorder: "border-[#D95430]",
+      todayBadge: "bg-[#D95430] text-white",
+      todayStripe: "today-stripe-peper",
+      monthWatermark: "text-[#73634F] opacity-[0.09]",
+      shadow: "shadow-none",
+      shadowLg: "shadow-xl shadow-[#73634F]/15",
+    };
+  }
+
   if (theme === "MONOTONE") {
     return {
       isDark: true,
@@ -29,6 +61,7 @@ export function getThemeColors(theme: Theme) {
       todayBorder: "border-zinc-600",
       todayBadge: "bg-zinc-200 text-zinc-950",
       todayStripe: "today-stripe-dark",
+      monthWatermark: "text-zinc-100 opacity-[0.09]",
       shadow: "shadow-none",
       shadowLg: "shadow-2xl shadow-black",
     };
@@ -60,6 +93,7 @@ export function getThemeColors(theme: Theme) {
       todayBorder: "border-[#662222]",
       todayBadge: "bg-[#c26666] text-white",
       todayStripe: "today-stripe-rose",
+      monthWatermark: "text-[#fdf2f2] opacity-[0.09]",
       shadow: "shadow-none",
       shadowLg: "shadow-2xl shadow-black",
     };
@@ -72,10 +106,10 @@ export function getThemeColors(theme: Theme) {
       bgHover: "hover:bg-slate-100",
       panelBg: "bg-white",
       itemBg: "bg-white",
-      itemBgHover: "hover:bg-slate-50",
+      itemBgHover: "hover:bg-slate-300",
       border: "border-slate-300",
       borderStrong: "border-slate-400",
-      borderHover: "hover:border-slate-500",
+      borderHover: "hover:border-slate-400",
       textMain: "text-slate-900",
       textSub: "text-slate-500",
       textSubHover: "hover:text-slate-800",
@@ -91,6 +125,7 @@ export function getThemeColors(theme: Theme) {
       todayBorder: "border-slate-400",
       todayBadge: "bg-slate-800 text-white",
       todayStripe: "today-stripe-japan",
+      monthWatermark: "text-slate-900 opacity-[0.08]",
       shadow: "shadow-none",
       shadowLg: "shadow-xl shadow-slate-200/50",
     };
@@ -103,10 +138,10 @@ export function getThemeColors(theme: Theme) {
     bgHover: isDark ? "hover:bg-[#1A2A40]" : "hover:bg-slate-100",
     panelBg: isDark ? "bg-[#060A11]" : "bg-white", // Sidebar etc
     itemBg: isDark ? "bg-[#0E1724]" : "bg-white", // Cards
-    itemBgHover: isDark ? "hover:bg-[#131F33]" : "hover:bg-slate-50",
+    itemBgHover: isDark ? "hover:bg-[#131F33]" : "hover:bg-slate-300",
     border: isDark ? "border-[#1C2C40]" : "border-slate-300",
     borderStrong: isDark ? "border-[#2B405C]" : "border-slate-400",
-    borderHover: isDark ? "hover:border-[#385273]" : "hover:border-slate-500",
+    borderHover: isDark ? "hover:border-[#385273]" : "hover:border-slate-400",
     textMain: isDark ? "text-[#CFE1F0]" : "text-slate-900",
     textSub: isDark ? "text-[#6A86A1]" : "text-slate-500",
     textSubHover: isDark ? "hover:text-[#A3BBD1]" : "hover:text-slate-800",
@@ -122,6 +157,7 @@ export function getThemeColors(theme: Theme) {
     todayBorder: isDark ? "border-[#385273]" : "border-slate-400",
     todayBadge: isDark ? "bg-[#2B405C] text-[#CFE1F0]" : "bg-slate-800 text-white",
     todayStripe: isDark ? "today-stripe-dark" : "today-stripe-light",
+    monthWatermark: isDark ? "text-[#CFE1F0] opacity-[0.09]" : "text-slate-900 opacity-[0.08]",
     shadow: isDark ? "shadow-none" : "shadow-sm",
     shadowLg: isDark
       ? "shadow-2xl shadow-black/80"

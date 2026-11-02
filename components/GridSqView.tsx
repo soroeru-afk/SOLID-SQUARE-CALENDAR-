@@ -39,14 +39,14 @@ export function GridSqView({
     return logsByDate[dateStr] || [];
   };
 
-  const dayNames = theme === "JAPAN" 
+  const dayNames = (theme === "JAPAN" || theme === "PEPER") 
     ? ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"] 
     : ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   const getHeaderColor = (idx: number) => {
-    if (theme === "JAPAN") {
-      if (idx === 0) return "text-[#6E0005]";
-      if (idx === 6) return "text-[#082666]";
+    if (theme === "JAPAN" || theme === "PEPER") {
+      if (idx === 0) return theme === "PEPER" ? "text-[#D95430]" : "text-[#6E0005]";
+      if (idx === 6) return theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
     }
     return colors.textMain;
   };
@@ -97,12 +97,12 @@ export function GridSqView({
           let dateNumColor = isToday ? colors.dateNumToday : colors.dateNum;
           let holidayName = undefined;
           
-          if (theme === "JAPAN") {
+          if (theme === "JAPAN" || theme === "PEPER") {
             holidayName = JapaneseHolidays.isHoliday(dateStrObj);
             if (dayOfWeek === 0 || holidayName) {
-              dateNumColor = "text-[#6E0005]";
+              dateNumColor = theme === "PEPER" ? "text-[#D95430]" : "text-[#6E0005]";
             } else if (dayOfWeek === 6) {
-              dateNumColor = "text-[#082666]";
+              dateNumColor = theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
             }
           }
 
@@ -110,7 +110,7 @@ export function GridSqView({
             <div
               key={dateStr + idx}
               className={`relative border flex flex-col group transition-all duration-300 hover:z-50 hover:opacity-100
-                ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} opacity-50`} 
+                ${isCurrentMonth ? `${colors.border} ${colors.itemBg}` : `${colors.border} ${theme === "PEPER" ? "bg-white/50" : ""} opacity-50`} 
                 ${isToday ? `ring-1 ring-inset ${colors.todayRing}` : ""}
               `}
             >
@@ -128,7 +128,7 @@ export function GridSqView({
                 {isToday && (
                   <div className="absolute top-1 left-1.5 z-20">
                     <span className={`px-1.5 py-0.5 text-[9px] font-bold font-sans tracking-wider leading-none select-none rounded-[2px] shadow-xs ${colors.todayBadge}`}>
-                      {theme === "JAPAN" ? "今日" : "TODAY"}
+                      {(theme === "JAPAN" || theme === "PEPER") ? "今日" : "TODAY"}
                     </span>
                   </div>
                 )}
@@ -153,7 +153,17 @@ export function GridSqView({
                     dayLogs.slice(0, 3).map((log: LogFile) => (
                       <div
                         key={log.name}
-                        className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate pointer-events-auto ${colors.shadow}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onLogClick(log);
+                        }}
+                        className={`border ${colors.borderStrong} ${
+                          theme === "PEPER"
+                            ? "bg-white hover:bg-[#D95430] hover:text-white hover:border-[#D95430]"
+                            : (theme === "LIGHT" || theme === "JAPAN")
+                            ? "bg-white hover:bg-slate-300 hover:border-slate-400 text-slate-900"
+                            : `${colors.panelBg} ${colors.itemBgHover} ${colors.borderHover} ${colors.textMain}`
+                        } py-[1px] px-1.5 leading-tight truncate pointer-events-auto cursor-pointer ${colors.shadow} transition-colors`}
                         style={{
                           fontSize: `${textSize}px`,
                           fontFamily: textFont,
@@ -190,18 +200,16 @@ export function GridSqView({
                     +
                   </button>
                   <div 
-                    className={`font-bold text-right leading-none flex items-center gap-1.5 ${
-                      ["NAVY", "ROSE", "MONOTONE"].includes(theme as string) ? 'text-white' : dateNumColor
-                    }`}
+                    className={`font-bold text-right leading-none flex items-center gap-1.5 ${(theme === "JAPAN" || theme === "PEPER") ? dateNumColor : colors.textMain}`}
                     style={{ fontSize: `12px`, fontFamily: dateFont, letterSpacing: '0.1em' }}
                   >
                     {isToday && (
                       <span className={`px-1 py-0.5 text-[8px] font-sans font-bold leading-none rounded-[2px] ${colors.todayBadge}`}>
-                        {theme === "JAPAN" ? "今日" : "TODAY"}
+                        {(theme === "JAPAN" || theme === "PEPER") ? "今日" : "TODAY"}
                       </span>
                     )}
-                    {theme === "JAPAN" 
-                      ? `${dateStrObj.getMonth() + 1}月${dateStrObj.getDate()}日` 
+                    {(theme === "JAPAN" || theme === "PEPER") 
+                      ? `${dateStrObj.getMonth() + 1}月${dateStrObj.getDate()}日`
                       : `${dateStrObj.toLocaleString("en-US", { month: "short" }).toUpperCase()} ${dateStrObj.getDate()}`
                     }
                   </div>
@@ -213,14 +221,28 @@ export function GridSqView({
                     <div
                       key={log.name}
                       onClick={() => onLogClick(log)}
-                      className={`border ${colors.borderStrong} ${colors.panelBg} ${colors.textMain} p-0.5 px-1 truncate cursor-pointer ${colors.itemBgHover} ${colors.borderHover} ${colors.shadow} transition-colors`}
+                      className={`border ${colors.borderStrong} ${
+                        theme === "PEPER"
+                          ? "bg-white hover:bg-[#D95430] hover:text-white hover:border-[#D95430] text-[#2D2319]"
+                          : (theme === "LIGHT" || theme === "JAPAN")
+                          ? "bg-white hover:bg-slate-300 hover:border-slate-400 text-slate-900"
+                          : `${colors.panelBg} ${colors.itemBgHover} ${colors.borderHover} ${colors.textMain}`
+                      } group/logitem py-[1px] px-1.5 leading-tight truncate cursor-pointer ${colors.shadow} transition-colors`}
                       title={log.title}
                       style={{
                         fontSize: `${textSize}px`,
                         fontFamily: textFont,
                       }}
                     >
-                      <span className="opacity-50 mr-1">
+                      <span
+                        className={`mr-1.5 ${
+                          theme === "PEPER"
+                            ? "opacity-60 group-hover/logitem:text-white group-hover/logitem:opacity-95"
+                            : (theme === "LIGHT" || theme === "JAPAN")
+                            ? "text-slate-500 group-hover/logitem:text-slate-800"
+                            : "opacity-50"
+                        }`}
+                      >
                         {formatTimeStr(log.timeStr)}
                       </span>
                       {log.title}
