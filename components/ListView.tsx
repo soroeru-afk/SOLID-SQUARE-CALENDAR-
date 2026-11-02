@@ -55,7 +55,7 @@ export function ListView({ currentDate, logs, onLogClick, onNewLog, theme, textS
                dateNumColor = theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
                dNameColor = theme === "PEPER" ? "text-[#3E5C76]" : "text-[#082666]";
              } else {
-               dateNumColor = colors.textMain;
+               dateNumColor = colors.dateNum;
              }
            }
 

@@ -18,7 +18,7 @@ export function getThemeColors(theme: Theme) {
       textSub: "text-[#73634F]",
       textSubHover: "hover:text-[#2D2319]",
       textDim: "text-[#8C7D6B]",
-      dateNum: "text-[#73634F]",
+      dateNum: "text-[#524637]",
       dateNumToday: "text-[#D95430]",
       accentBg: "bg-[#E5DEC9]",
       accentBgHover: "hover:bg-[#DACFBA]",
