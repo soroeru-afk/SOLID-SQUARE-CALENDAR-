@@ -318,7 +318,7 @@ export default function App() {
         metaColor = "#060A11";
         break;
       case "PEPER":
-        metaColor = "#F2EFE6";
+        metaColor = "#EBE4D5";
         break;
     }
 
